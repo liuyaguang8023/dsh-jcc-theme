@@ -36,7 +36,7 @@ assert.equal(typeof definition.factory, 'function')
 
 const source = sandbox.__jccThemeSource
 assert.ok(source, 'the palette source is exposed for checks')
-assert.deepEqual([...source.accents], ['gold', 'cyan', 'violet'])
+assert.deepEqual([...source.accents], ['gold', 'cyan', 'violet', 'blue'])
 assert.deepEqual([...source.textures], ['subtle', 'normal', 'vivid'])
 
 const css = source.paletteCss()
@@ -50,10 +50,10 @@ assert.ok(!css.includes('undefined'), 'no undefined token value')
 /* One base pair plus one pair per accent, for both schemes. */
 const lightBlocks = css.match(/body:not\(\[data-ds-dark-theme\]\)/g) || []
 const darkBlocks = css.match(/body\[data-ds-dark-theme\]/g) || []
-assert.equal(lightBlocks.length, 4, 'light: base + three accents')
-assert.equal(darkBlocks.length, 4, 'dark: base + three accents')
+assert.equal(lightBlocks.length, 5, 'light: base + four accents')
+assert.equal(darkBlocks.length, 5, 'dark: base + four accents')
 
-for (const accent of ['gold', 'cyan', 'violet']) {
+for (const accent of ['gold', 'cyan', 'violet', 'blue']) {
   assert.ok(
     css.includes(`:root[data-jcc-accent="${accent}"]{--jcc-accent:`),
     `${accent} declares its own accent variables`

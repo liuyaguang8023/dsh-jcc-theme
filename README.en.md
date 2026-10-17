@@ -18,10 +18,14 @@ accent colour and board texture — or turning the whole thing off.
 - **Original backdrop** — the dark scene is a hexagonal arena with a golden spatula crest
   and floating hex crystals; the light one is an old chart with contours, a compass and the
   same crest. Both are inline SVG data URIs, so no image is ever fetched.
-- **Three augments** — Hextech Gold, Arcane Cyan, Fury Violet. Borders, brand fills,
-  links, focus rings and sidebar selection all follow the choice, live.
+- **Four augments** — Hextech Gold, Arcane Cyan, Fury Violet, Astral Blue. Borders, brand
+  fills, links, focus rings and sidebar selection all follow the choice, live.
 - **Three board textures** — Subtle / Standard / Vivid, controlling the lattice and the
   two ambient lights behind the interface.
+- **Ambience** — a slow aurora and two drifting layers of gold dust behind the app; toggle
+  it in the panel, and it stays still under `prefers-reduced-motion`.
+- **Corner style** — Soft / Sharp. Sharp also tightens the product's own radius tokens, so
+  cards, buttons and the panel square off together.
 - **Hex-core panel** — the floating hexagon in the bottom-right corner. Turn the theme
   on or off, pick an accent, pick a texture, reset to defaults. Stored locally, no
   network.
@@ -32,9 +36,9 @@ Light:
 
 ![Light · Hextech Gold](assets/screenshot-light.png)
 
-Arcane Cyan with the vivid board:
+Astral Blue with the vivid board and sharp corners:
 
-![Dark · Arcane Cyan](assets/screenshot-cyan.png)
+![Dark · Astral Blue · Sharp](assets/screenshot-sharp.png)
 
 ## Install
 
@@ -59,13 +63,15 @@ Refresh the page when the market asks; if the host composes bundles at startup, 
 1. Click the hexagon in the bottom-right corner.
 2. In the panel:
    - **Theme on** — master switch; off restores the stock UI completely;
-   - **Augment** — gold / cyan / violet accent;
+   - **Augment** — gold / cyan / violet / blue accent;
    - **Board texture** — subtle / standard / vivid;
-   - **Reset** — back to Hextech Gold with the standard board.
+   - **Corners** — soft / sharp;
+   - **Ambience** — aurora and gold dust on/off;
+   - **Reset** — back to Hextech Gold, standard board, soft corners, ambience on.
 3. Click outside or press `Esc` to close.
 
 The choice lives in `localStorage` under `dsh-jcc/v1`
-(`{"on":true,"accent":"gold","texture":"normal"}`). Nothing is uploaded.
+(`{"on":true,"accent":"gold","texture":"normal","ambience":true,"corners":"soft"}`). Nothing is uploaded.
 
 ## How it works
 
@@ -78,6 +84,11 @@ The choice lives in `localStorage` under `dsh-jcc/v1`
   layer still while messages scroll. The app frame and each page root cover that canvas with `--dsw-alias-bg-base`,
   so the client marks only the full-viewport canvas layers transparent at runtime —
   sticky headers, cards and attachments keep their opaque fill.
+- **Ambience** — a fixed `z-index: -1` layer: two dust fields drift with `transform`, the
+  aurora breathes with a radial gradient. The canvas layers are transparent, so it stays
+  behind the interface and never covers text.
+- **Corners** — sharp mode overrides both the panel's own radii and the product's
+  `--dsw-radius-*` tokens, so cards, buttons and the panel change together.
 - **Panel** — plain DOM and CSS. No React, no `slots`, no host API, so a component rename
   in a future host cannot break it; only the stable `data-ds-dark-theme` attribute and
   the design tokens are coupled.

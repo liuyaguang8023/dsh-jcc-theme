@@ -33,6 +33,28 @@
   --jcc-hud-text-2: #c3b79e;
   --jcc-hud-text-3: #8d8370;
   --jcc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --jcc-radius-panel: 16px;
+  --jcc-radius-control: 10px;
+  --jcc-radius-pill: 999px;
+  --jcc-panel-blur: 18px;
+}
+
+/* Sharp HUD corners: the panel and the product's own radii both tighten. */
+:root[data-jcc-corners="sharp"] {
+  --jcc-radius-panel: 8px;
+  --jcc-radius-control: 4px;
+  --jcc-radius-pill: 4px;
+  --jcc-panel-blur: 8px;
+}
+
+:root[data-jcc="on"][data-jcc-corners="sharp"] body {
+  --dsw-radius-xs: 2px;
+  --dsw-radius-sm: 3px;
+  --dsw-radius-md: 4px;
+  --dsw-radius-lg: 6px;
+  --dsw-radius-xl: 8px;
+  --dsw-radius-panel: 10px;
 }
 
 :root[data-jcc="on"][data-jcc-texture="subtle"] {
@@ -159,7 +181,65 @@
   background: color-mix(in srgb, var(--jcc-accent) 38%, transparent);
 }
 
-/* ── 2. Launcher: the hex core in the bottom-right corner ───────────────── */
+:root[data-jcc="on"] a[href]:hover {
+  text-shadow: 0 0 10px color-mix(in srgb, var(--jcc-accent) 55%, transparent);
+}
+
+/* ── 2. Ambience: dust and a slow aurora behind the app ──────────────────── */
+
+.jcc-ambience {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+:root[data-jcc="on"][data-jcc-ambience="on"] .jcc-ambience {
+  display: block;
+}
+
+.jcc-ambience::before,
+.jcc-ambience::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background-image:
+    radial-gradient(circle at 12% 24%, color-mix(in srgb, var(--jcc-deco) 62%, transparent) 0 1.3px, transparent 1.9px),
+    radial-gradient(circle at 68% 12%, color-mix(in srgb, var(--jcc-deco) 48%, transparent) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 38% 66%, color-mix(in srgb, var(--jcc-deco) 56%, transparent) 0 1.5px, transparent 2.1px),
+    radial-gradient(circle at 86% 54%, color-mix(in srgb, var(--jcc-deco) 40%, transparent) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 58% 88%, color-mix(in srgb, var(--jcc-deco) 52%, transparent) 0 1.2px, transparent 1.8px),
+    radial-gradient(circle at 8% 76%, color-mix(in srgb, var(--jcc-deco) 38%, transparent) 0 0.9px, transparent 1.4px);
+  background-size: 460px 460px, 610px 610px, 380px 380px, 720px 720px, 520px 520px, 840px 840px;
+  animation: jcc-drift 180s linear infinite;
+  opacity: 0.5;
+}
+
+.jcc-ambience::after {
+  animation-direction: reverse;
+  animation-duration: 260s;
+  opacity: 0.26;
+}
+
+.jcc-aurora {
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  width: 120vmax;
+  height: 90vmax;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--jcc-accent) 13%, transparent),
+    transparent 66%
+  );
+  opacity: 0.45;
+  animation: jcc-breathe 22s ease-in-out infinite alternate;
+}
+
+/* ── 3. Launcher: the hex core in the bottom-right corner ────────────────── */
 
 .jcc-dock {
   position: fixed;
@@ -280,7 +360,7 @@
   filter: grayscale(0.55) brightness(0.86) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
 }
 
-/* ── 3. Panel: the hex-core HUD ─────────────────────────────────────────── */
+/* ── 4. Panel: the hex-core HUD ─────────────────────────────────────────── */
 
 .jcc-panel {
   position: fixed;
@@ -300,14 +380,14 @@
     ),
     linear-gradient(180deg, #131c2e, var(--jcc-hud-bg) 72%);
   border: 1px solid color-mix(in srgb, var(--jcc-accent) 42%, transparent);
-  border-radius: 16px;
+  border-radius: var(--jcc-radius-panel);
   box-shadow:
     0 26px 70px rgba(0, 0, 0, 0.55),
     0 0 0 1px rgba(0, 0, 0, 0.35),
     0 0 40px -14px color-mix(in srgb, var(--jcc-accent) 60%, transparent);
   font: 400 13px/1.45 var(--dsw-font-family, system-ui, sans-serif);
-  -webkit-backdrop-filter: blur(18px) saturate(1.1);
-  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(var(--jcc-panel-blur)) saturate(1.1);
+  backdrop-filter: blur(var(--jcc-panel-blur)) saturate(1.1);
   animation: jcc-pop 0.18s var(--jcc-ease);
 }
 
@@ -392,7 +472,7 @@
   height: 26px;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: calc(var(--jcc-radius-control) - 2px);
   color: var(--jcc-hud-text-3);
   background: transparent;
   cursor: pointer;
@@ -419,7 +499,8 @@
 }
 
 .jcc-row + .jcc-field,
-.jcc-field + .jcc-field {
+.jcc-field + .jcc-field,
+.jcc-field + .jcc-row {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -444,7 +525,7 @@
   height: 22px;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--jcc-accent) 40%, transparent);
-  border-radius: 999px;
+  border-radius: var(--jcc-radius-pill);
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
   transition: background 0.18s, border-color 0.18s;
@@ -474,8 +555,8 @@
 /* accent swatches */
 .jcc-swatches {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 
 .jcc-swatch {
@@ -483,13 +564,13 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  padding: 7px 4px 6px;
+  padding: 7px 2px 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: var(--jcc-radius-control);
   color: var(--jcc-hud-text-3);
   background: transparent;
   font: inherit;
-  font-size: 10.5px;
+  font-size: 10px;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
@@ -521,6 +602,10 @@
   background: linear-gradient(160deg, #e2d6ff, #9b7bea 60%, #5b3bbd);
 }
 
+.jcc-swatch[data-accent="blue"] .jcc-hex {
+  background: linear-gradient(160deg, #d6e9ff, #4f93f0 60%, #1f5aa6);
+}
+
 /* texture segmented control */
 .jcc-seg {
   display: grid;
@@ -528,14 +613,18 @@
   gap: 2px;
   padding: 2px;
   border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 9px;
+  border-radius: calc(var(--jcc-radius-control) - 1px);
   background: rgba(255, 255, 255, 0.04);
+}
+
+.jcc-seg--two {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .jcc-seg button {
   padding: 5px 0;
   border: 0;
-  border-radius: 7px;
+  border-radius: calc(var(--jcc-radius-control) - 3px);
   color: var(--jcc-hud-text-3);
   background: transparent;
   font: inherit;
@@ -565,7 +654,7 @@
 .jcc-reset {
   padding: 2px 4px;
   border: 0;
-  border-radius: 6px;
+  border-radius: calc(var(--jcc-radius-control) - 4px);
   color: var(--jcc-accent-2);
   background: transparent;
   font: inherit;
@@ -577,7 +666,7 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* ── 4. Motion ──────────────────────────────────────────────────────────── */
+/* ── 5. Motion ──────────────────────────────────────────────────────────── */
 
 @keyframes jcc-orbit {
   to {
@@ -592,7 +681,27 @@
   }
 }
 
-/* ── 5. Small screens ───────────────────────────────────────────────────── */
+@keyframes jcc-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-140px, -180px, 0);
+  }
+}
+
+@keyframes jcc-breathe {
+  from {
+    opacity: 0.3;
+    transform: translateX(-50%) scale(1);
+  }
+  to {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(1.06);
+  }
+}
+
+/* ── 6. Small screens ───────────────────────────────────────────────────── */
 
 @media (max-width: 860px) {
   .jcc-dock {
@@ -612,6 +721,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .jcc-halo {
+    animation: none;
+  }
+
+  .jcc-ambience::before,
+  .jcc-ambience::after,
+  .jcc-aurora {
     animation: none;
   }
 

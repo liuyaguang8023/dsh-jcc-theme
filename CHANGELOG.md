@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.2 — 2026-10-18
+
+- Fourth augment: **Astral Blue** (星界蓝), with its own light/dark token pair.
+- **Ambience** layer: a slow aurora plus two drifting layers of gold dust behind the
+  interface, toggled from the panel and stilled by `prefers-reduced-motion`.
+- **Corner style**: Soft / Sharp. Sharp also tightens the product's own radius tokens, so
+  cards, buttons and the panel all square off together.
+- Hovered links pick up a soft accent glow.
+- Panel controls for both new options; state stays in the same `dsh-jcc/v1` key.
+
+
 ## 0.1.1 — 2026-10-17
 
 - Original backdrop: a hextech night arena with a golden spatula crest for dark mode, and a

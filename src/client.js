@@ -24,8 +24,10 @@
   var STYLE_ID = 'dsh-jcc-theme-style'
   var DOCK_ID = 'dsh-jcc-dock'
   var PANEL_ID = 'dsh-jcc-panel'
+  var AMBIENCE_ID = 'dsh-jcc-ambience'
   var STORE_KEY = 'dsh-jcc/v1'
-  var ACCENT_IDS = ['gold', 'cyan', 'violet']
+  var ACCENT_IDS = ['gold', 'cyan', 'violet', 'blue']
+  var CORNERS = ['soft', 'sharp']
   var TEXTURES = ['subtle', 'normal', 'vivid']
 
   /* theme.css, inlined by build.mjs. */
@@ -191,6 +193,13 @@
       accent: '#b08cff',
       accent2: '#d9c7ff',
       accentDeep: '#6d4bd1'
+    },
+    blue: {
+      light: { fill: '#4f93f0', hover: '#3f82df', line: '#2f6fb8', strong: '#1f5aa6', ink: '#061426' },
+      dark: { fill: '#7fb8ff', hover: '#a8ccff', line: '#7fb8ff', strong: '#b9d7ff', ink: '#061426' },
+      accent: '#7fb8ff',
+      accent2: '#b9d7ff',
+      accentDeep: '#2f6fb8'
     }
   }
 
@@ -290,12 +299,16 @@
       accentHint: '强调色',
       texture: '棋盘纹理',
       textures: ['淡', '标准', '浓烈'],
+      corners: '界面棱角',
+      cornersSoft: '圆润',
+      cornersSharp: '锐利',
+      ambience: '氛围光效',
       reset: '恢复默认',
       close: '关闭',
       open: '金铲铲主题设置',
       foot: '非官方同人',
-      names: { gold: '海克斯金', cyan: '奥术青', violet: '狂暴紫' },
-      short: { gold: '金', cyan: '青', violet: '紫' }
+      names: { gold: '海克斯金', cyan: '奥术青', violet: '狂暴紫', blue: '星界蓝' },
+      short: { gold: '金', cyan: '青', violet: '紫', blue: '蓝' }
     },
     en: {
       title: 'Hextech Core',
@@ -305,12 +318,16 @@
       accentHint: 'accent',
       texture: 'Board texture',
       textures: ['Subtle', 'Standard', 'Vivid'],
+      corners: 'Corners',
+      cornersSoft: 'Soft',
+      cornersSharp: 'Sharp',
+      ambience: 'Ambience',
       reset: 'Reset',
       close: 'Close',
       open: 'Golden Spatula theme settings',
       foot: 'unofficial fan work',
-      names: { gold: 'Hextech Gold', cyan: 'Arcane Cyan', violet: 'Fury Violet' },
-      short: { gold: 'Gold', cyan: 'Cyan', violet: 'Violet' }
+      names: { gold: 'Hextech Gold', cyan: 'Arcane Cyan', violet: 'Fury Violet', blue: 'Astral Blue' },
+      short: { gold: 'Gold', cyan: 'Cyan', violet: 'Violet', blue: 'Blue' }
     }
   }
 
@@ -382,9 +399,10 @@
       var canvasObserver = null
       var canvasTimer = 0
       var canvasPath = ''
+      var ambience = null
 
       function readState() {
-        var fallback = { on: true, accent: 'gold', texture: 'normal' }
+        var fallback = { on: true, accent: 'gold', texture: 'normal', ambience: true, corners: 'soft' }
         try {
           var raw = window.localStorage.getItem(STORE_KEY)
           if (!raw) return fallback
@@ -393,6 +411,8 @@
           if (typeof saved.on === 'boolean') fallback.on = saved.on
           if (ACCENT_IDS.indexOf(saved.accent) !== -1) fallback.accent = saved.accent
           if (TEXTURES.indexOf(saved.texture) !== -1) fallback.texture = saved.texture
+          if (typeof saved.ambience === 'boolean') fallback.ambience = saved.ambience
+          if (CORNERS.indexOf(saved.corners) !== -1) fallback.corners = saved.corners
         } catch (error) {
           /* private mode, disabled storage, corrupt JSON — defaults are fine */
         }
@@ -412,6 +432,8 @@
         root.dataset.jcc = state.on ? 'on' : 'off'
         root.dataset.jccAccent = state.accent
         root.dataset.jccTexture = state.texture
+        root.dataset.jccAmbience = state.ambience ? 'on' : 'off'
+        root.dataset.jccCorners = state.corners
       }
 
       /* -------------------------------------------------------------------
@@ -527,7 +549,9 @@
         state = {
           on: patch.on === undefined ? state.on : Boolean(patch.on),
           accent: ACCENT_IDS.indexOf(patch.accent) === -1 ? state.accent : patch.accent,
-          texture: TEXTURES.indexOf(patch.texture) === -1 ? state.texture : patch.texture
+          texture: TEXTURES.indexOf(patch.texture) === -1 ? state.texture : patch.texture,
+          ambience: patch.ambience === undefined ? state.ambience : Boolean(patch.ambience),
+          corners: CORNERS.indexOf(patch.corners) === -1 ? state.corners : patch.corners
         }
         saveState()
         applyAttributes()
@@ -584,7 +608,7 @@
           '<div class="jcc-field">' +
           '<span class="jcc-label">' + c.accent + '<em>' + c.accentHint + '</em></span>' +
           '<div class="jcc-swatches">' +
-          swatch('gold', c) + swatch('cyan', c) + swatch('violet', c) +
+          swatch('gold', c) + swatch('cyan', c) + swatch('violet', c) + swatch('blue', c) +
           '</div>' +
           '</div>' +
           '<div class="jcc-field">' +
@@ -594,6 +618,18 @@
           '<button type="button" data-texture="normal" aria-pressed="false">' + c.textures[1] + '</button>' +
           '<button type="button" data-texture="vivid" aria-pressed="false">' + c.textures[2] + '</button>' +
           '</div>' +
+          '</div>' +
+          '<div class="jcc-field">' +
+          '<span class="jcc-label">' + c.corners + '</span>' +
+          '<div class="jcc-seg jcc-seg--two" role="group" aria-label="' + c.corners + '">' +
+          '<button type="button" data-corners="soft" aria-pressed="false">' + c.cornersSoft + '</button>' +
+          '<button type="button" data-corners="sharp" aria-pressed="false">' + c.cornersSharp + '</button>' +
+          '</div>' +
+          '</div>' +
+          '<div class="jcc-row">' +
+          '<span class="jcc-label">' + c.ambience + '</span>' +
+          '<button type="button" class="jcc-switch" data-jcc="ambience" role="switch" aria-checked="true" aria-label="' +
+          c.ambience + '"><span></span></button>' +
           '</div>' +
           '<div class="jcc-panel__foot">' +
           '<span>v' + VERSION + ' · ' + c.foot + '</span>' +
@@ -614,8 +650,10 @@
         /* A hot reload may leave the previous instance behind. */
         var staleDock = document.getElementById(DOCK_ID)
         var stalePanel = document.getElementById(PANEL_ID)
+        var staleAmbience = document.getElementById(AMBIENCE_ID)
         if (staleDock) staleDock.remove()
         if (stalePanel) stalePanel.remove()
+        if (staleAmbience) staleAmbience.remove()
 
         var c = currentCopy()
         dock = document.createElement('div')
@@ -635,6 +673,13 @@
         panel.hidden = true
         panel.innerHTML = panelHtml(c)
 
+        ambience = document.createElement('div')
+        ambience.className = 'jcc-ambience'
+        ambience.id = AMBIENCE_ID
+        ambience.setAttribute('aria-hidden', 'true')
+        ambience.innerHTML = '<span class="jcc-aurora"></span>'
+
+        document.body.appendChild(ambience)
         document.body.appendChild(dock)
         document.body.appendChild(panel)
 
@@ -660,6 +705,11 @@
         var toggle = panel.querySelector('[data-jcc="toggle"]')
         if (toggle) toggle.setAttribute('aria-checked', state.on ? 'true' : 'false')
 
+        var ambienceToggle = panel.querySelector('[data-jcc="ambience"]')
+        if (ambienceToggle) {
+          ambienceToggle.setAttribute('aria-checked', state.ambience ? 'true' : 'false')
+        }
+
         var accents = panel.querySelectorAll('[data-accent]')
         for (var i = 0; i < accents.length; i += 1) {
           accents[i].setAttribute(
@@ -673,6 +723,14 @@
           textures[j].setAttribute(
             'aria-pressed',
             textures[j].getAttribute('data-texture') === state.texture ? 'true' : 'false'
+          )
+        }
+
+        var corners = panel.querySelectorAll('[data-corners]')
+        for (var k = 0; k < corners.length; k += 1) {
+          corners[k].setAttribute(
+            'aria-pressed',
+            corners[k].getAttribute('data-corners') === state.corners ? 'true' : 'false'
           )
         }
       }
@@ -701,7 +759,7 @@
         while (node && node !== panel) {
           if (
             node.dataset &&
-            (node.dataset.jcc || node.dataset.accent || node.dataset.texture)
+            (node.dataset.jcc || node.dataset.accent || node.dataset.texture || node.dataset.corners)
           ) {
             return node
           }
@@ -718,11 +776,15 @@
         } else if (control.dataset.jcc === 'toggle') {
           setState({ on: !state.on })
         } else if (control.dataset.jcc === 'reset') {
-          setState({ on: true, accent: 'gold', texture: 'normal' })
+          setState({ on: true, accent: 'gold', texture: 'normal', ambience: true, corners: 'soft' })
+        } else if (control.dataset.jcc === 'ambience') {
+          setState({ ambience: !state.ambience })
         } else if (control.dataset.accent) {
           setState({ accent: control.dataset.accent })
         } else if (control.dataset.texture) {
           setState({ texture: control.dataset.texture })
+        } else if (control.dataset.corners) {
+          setState({ corners: control.dataset.corners })
         }
       }
 
@@ -776,6 +838,10 @@
           if (orb) orb.removeEventListener('click', onOrbClick)
           if (panel) panel.removeEventListener('click', onPanelClick)
           mounted = false
+        }
+        if (ambience) {
+          ambience.remove()
+          ambience = null
         }
         if (dock) {
           dock.remove()

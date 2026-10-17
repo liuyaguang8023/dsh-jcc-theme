@@ -53,7 +53,8 @@
           var css = style ? style.textContent : ''
           check('token block for light', css.indexOf(':root[data-jcc="on"] body:not([data-ds-dark-theme])') !== -1)
           check('token block for dark', css.indexOf(':root[data-jcc="on"] body[data-ds-dark-theme]') !== -1)
-          check('three accents in the sheet', (css.match(/--jcc-accent:/g) || []).length >= 4)
+          check('four accents in the sheet', (css.match(/--jcc-accent:/g) || []).length >= 5)
+          check('ambience layer present', !!document.getElementById('dsh-jcc-ambience'))
           check('launcher styles present', css.indexOf('.jcc-orb') !== -1)
 
           var orb = document.querySelector('.jcc-orb')
@@ -72,9 +73,24 @@
           check('cyan swatch is pressed', panel.querySelector('[data-accent="cyan"]').getAttribute('aria-pressed') === 'true')
           check('gold swatch released', panel.querySelector('[data-accent="gold"]').getAttribute('aria-pressed') === 'false')
 
+          panel.querySelector('[data-accent="blue"]').click()
+          check('accent switches to blue', document.documentElement.dataset.jccAccent === 'blue')
+          check('blue swatch is pressed', panel.querySelector('[data-accent="blue"]').getAttribute('aria-pressed') === 'true')
+
           panel.querySelector('[data-texture="vivid"]').click()
           check('texture switches to vivid', document.documentElement.dataset.jccTexture === 'vivid')
           check('vivid segment pressed', panel.querySelector('[data-texture="vivid"]').getAttribute('aria-pressed') === 'true')
+
+          panel.querySelector('[data-corners="sharp"]').click()
+          check('corners switch to sharp', document.documentElement.dataset.jccCorners === 'sharp')
+          check('sharp segment pressed', panel.querySelector('[data-corners="sharp"]').getAttribute('aria-pressed') === 'true')
+
+          var ambience = document.getElementById('dsh-jcc-ambience')
+          check('ambience visible by default', window.getComputedStyle(ambience).display !== 'none')
+          panel.querySelector('[data-jcc="ambience"]').click()
+          check('ambience switches off', document.documentElement.dataset.jccAmbience === 'off')
+          check('ambience hidden', window.getComputedStyle(ambience).display === 'none')
+          check('ambience switch reflects off', panel.querySelector('[data-jcc="ambience"]').getAttribute('aria-checked') === 'false')
 
           panel.querySelector('[data-jcc="toggle"]').click()
           check('theme switches off', document.documentElement.dataset.jcc === 'off')
@@ -85,7 +101,9 @@
             'reset restores defaults',
             document.documentElement.dataset.jcc === 'on' &&
               document.documentElement.dataset.jccAccent === 'gold' &&
-              document.documentElement.dataset.jccTexture === 'normal'
+              document.documentElement.dataset.jccTexture === 'normal' &&
+              document.documentElement.dataset.jccAmbience === 'on' &&
+              document.documentElement.dataset.jccCorners === 'soft'
           )
 
           /* Outside click closes the panel. */
@@ -112,6 +130,7 @@
           check('dispose removes the style', !document.getElementById('dsh-jcc-theme-style'))
           check('dispose removes the orb', !document.querySelector('.jcc-orb'))
           check('dispose removes the panel', !document.querySelector('.jcc-panel'))
+          check('dispose removes the ambience', !document.getElementById('dsh-jcc-ambience'))
           check('dispose clears attributes', document.documentElement.dataset.jcc === undefined)
 
           var passed = results.every(function (line) {

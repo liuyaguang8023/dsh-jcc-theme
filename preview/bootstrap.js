@@ -9,7 +9,9 @@
   var stored = {
     on: params.get('on') !== '0',
     accent: params.get('accent') || 'gold',
-    texture: params.get('texture') || 'normal'
+    texture: params.get('texture') || 'normal',
+    corners: params.get('corners') || 'soft',
+    ambience: params.get('ambience') !== '0'
   }
 
   /* Chrome on file:// may expose a read-only storage object; a stand-in keeps

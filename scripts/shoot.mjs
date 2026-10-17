@@ -42,8 +42,8 @@ const shots = [
     query: 'scheme=light&accent=gold&texture=normal'
   },
   {
-    file: 'screenshot-cyan.png',
-    query: 'scheme=dark&accent=cyan&texture=vivid&panel=1'
+    file: 'screenshot-sharp.png',
+    query: 'scheme=dark&accent=blue&texture=vivid&corners=sharp&panel=1'
   }
 ]
 
