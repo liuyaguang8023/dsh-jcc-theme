@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dsh-jcc-theme · preview</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="preview.css" />
+    <script>
+      window.__ModuleLoader__ = {
+        load: function (definition) {
+          window.__jccDefinition = definition
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">DS</span>
+          <span>DeepSeek Harness</span>
+        </div>
+        <button class="new-chat" type="button">＋ 新建会话</button>
+
+        <nav class="nav">
+          <div class="nav-item active"><span class="dot"></span>会话</div>
+          <div class="nav-item">技能包</div>
+          <div class="nav-item">插件市场</div>
+        </nav>
+
+        <div class="side-label">最近</div>
+        <div class="sessions">
+          <div class="session active">
+            <b>金铲铲主题 · 海克斯核心</b>
+            <small>刚刚</small>
+          </div>
+          <div class="session">
+            <b>桌面端打包与签名流程</b>
+            <small>昨天</small>
+          </div>
+          <div class="session">
+            <b>把插件发布到市场</b>
+            <small>10 月 15 日</small>
+          </div>
+          <div class="session">
+            <b>整理设计令牌</b>
+            <small>10 月 14 日</small>
+          </div>
+        </div>
+
+        <div class="side-foot">
+          <span class="avatar">LY</span>
+          <span>liuyaguang8023</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="title">金铲铲主题 · 海克斯核心</div>
+          <div class="chips">
+            <span class="chip">deepseek-flash</span>
+            <span class="chip">工作区</span>
+          </div>
+        </header>
+
+        <div class="thread">
+          <div class="thread-inner">
+            <div class="msg user">
+              <span class="who">你</span>
+              <div class="bubble">给这个主题再加一点海克斯的味道，配色和棋盘底纹都要。</div>
+            </div>
+
+            <div class="msg assistant">
+              <span class="who">DeepSeek</span>
+              <h2>海克斯核心已接入</h2>
+              <p>
+                主题通过 <span class="inline-code">--dsw-alias-*</span> 令牌重新着色，
+                面板、输入框、代码块和侧栏都跟着换了一套金蓝配色；
+                底纹是三层
+                <span class="inline-code">repeating-linear-gradient</span>
+                叠出来的六边形棋盘。
+              </p>
+
+              <div class="code">
+                <div class="code-head"><span>palette.js</span><span>3 accents · 2 schemes</span></div>
+                <pre><span class="tok-cmt">// 令牌按强调色成对生成，切换时无需重载</span>
+<span class="tok-key">const</span> accent = <span class="tok-str">'gold'</span>
+<span class="tok-key">const</span> tokens = <span class="tok-key">for</span> (scheme <span class="tok-key">of</span> [<span class="tok-str">'light'</span>, <span class="tok-str">'dark'</span>])
+  <span class="tok-key">return</span> { <span class="tok-str">'--dsw-alias-brand-primary'</span>: fill(scheme) }</pre>
+              </div>
+
+              <div class="tool">
+                <span class="glyph">⌘</span>
+                <span>写入 3 组强调色 · 91 个令牌</span>
+                <small>已完成</small>
+              </div>
+
+              <div class="card">
+                <div class="row">
+                  <span class="label">外观</span>
+                  <span class="value">海克斯棋盘 · 深色</span>
+                </div>
+                <div class="row">
+                  <span class="label">棋盘纹理</span>
+                  <span class="seg"><span>淡</span><span class="on">标准</span><span>浓烈</span></span>
+                </div>
+                <div class="row">
+                  <span class="label">强调色</span>
+                  <span class="value">海克斯金</span>
+                </div>
+              </div>
+
+              <p>
+                右下角是「海克斯核心」：点开可以关闭主题、切换强化符文（强调色）或调整棋盘纹理，
+                选择会记在本机。想还原原生界面时，关掉开关即可，
+                <a class="link" href="#preview">无需卸载</a>。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer-wrap">
+          <div class="composer">
+            <div class="placeholder">问点什么…（Enter 发送，Shift + Enter 换行）</div>
+            <div class="composer-bar">
+              <span class="pill">＋</span>
+              <span class="pill">@ 引用</span>
+              <span class="pill">/ 命令</span>
+              <span class="spacer"></span>
+              <span class="pill">deepseek-flash</span>
+              <button class="send" type="button" aria-label="发送">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M8 13V3M3.8 7.2 8 3l4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="../client/index.js"></script>
+    <script src="bootstrap.js"></script>
+  </body>
+</html>

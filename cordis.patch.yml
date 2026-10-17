@@ -1,0 +1,7 @@
+# dsh bundle patch: mounts this theme as one loader entry.
+#
+# The package's `dsh.bundle.patch` points here, which is what makes it
+# installable with `dsh plugin add` and reconcilable by the plugin market.
+- insert:
+    - id: ui-jcc-theme
+      name: 'dsh-jcc-theme'

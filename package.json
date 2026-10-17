@@ -1,0 +1,69 @@
+{
+  "name": "dsh-jcc-theme",
+  "version": "0.1.0",
+  "description": "Golden Spatula fan theme for the DeepSeek Harness Web GUI: hextech gold and arcane accents, a hex-board backdrop, and a floating hex-core panel for accent and texture. 金铲铲同人主题：海克斯金与奥术配色、六边形棋盘底纹、海克斯核心面板。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./client/index.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  },
+  "files": [
+    "lib",
+    "client",
+    "cordis.patch.yml",
+    "assets/icon.svg",
+    "README.md",
+    "README.en.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "dsh-plugin",
+    "theme",
+    "golden-spatula",
+    "tft",
+    "hextech",
+    "dark-theme"
+  ],
+  "license": "MIT",
+  "author": "liuyaguang8023",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liuyaguang8023/dsh-jcc-theme.git"
+  },
+  "homepage": "https://github.com/liuyaguang8023/dsh-jcc-theme#readme",
+  "bugs": {
+    "url": "https://github.com/liuyaguang8023/dsh-jcc-theme/issues"
+  },
+  "icon": "./assets/icon.svg",
+  "engines": {
+    "node": ">=20",
+    "dsh": ">=0.2.0-rc.1 <0.3.0-0"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node test/manifest.mjs && node test/client.mjs",
+    "test:dom": "node test/dom.mjs",
+    "shots": "node scripts/shoot.mjs",
+    "prepack": "node build.mjs && node test/manifest.mjs"
+  }
+}

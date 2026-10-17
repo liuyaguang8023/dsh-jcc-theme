@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>dsh-jcc-theme · DOM contract</title>
+    <style>
+      #result { white-space: pre; font: 13px/1.6 ui-monospace, monospace; }
+      .fail { color: #b00020; }
+    </style>
+    <script>
+      try {
+        localStorage.removeItem('dsh-jcc/v1')
+      } catch (error) {
+        /* file:// in some browsers has no storage; the bundle tolerates it */
+      }
+    </script>
+  </head>
+  <body>
+    <p>Materializing the real bundle against a real DOM…</p>
+    <pre id="result">running</pre>
+
+    <script>
+      window.__ModuleLoader__ = {
+        load: function (definition) {
+          window.__jccDefinition = definition
+        }
+      }
+    </script>
+    <script src="../client/index.js"></script>
+    <script>
+      ;(function () {
+        var results = []
+        function check(name, condition, detail) {
+          results.push((condition ? 'PASS ' : 'FAIL ') + name + (condition || !detail ? '' : ' — ' + detail))
+        }
+
+        try {
+          var api = window.__jccDefinition.factory(function (name) {
+            throw new Error('unexpected require: ' + name)
+          })
+
+          check('module has apply()', typeof api.apply === 'function')
+          check('module name', api.name === 'ui-jcc-theme')
+          check('no client dependencies', Array.isArray(api.inject) && api.inject.length === 0)
+
+          /* Materialization already ran inside factory(). */
+          check('style injected early', !!document.getElementById('dsh-jcc-theme-style'))
+          check('theme attribute on <html>', document.documentElement.dataset.jcc === 'on')
+          check('accent attribute', document.documentElement.dataset.jccAccent === 'gold')
+          check('texture attribute', document.documentElement.dataset.jccTexture === 'normal')
+
+          var style = document.getElementById('dsh-jcc-theme-style')
+          var css = style ? style.textContent : ''
+          check('token block for light', css.indexOf(':root[data-jcc="on"] body:not([data-ds-dark-theme])') !== -1)
+          check('token block for dark', css.indexOf(':root[data-jcc="on"] body[data-ds-dark-theme]') !== -1)
+          check('three accents in the sheet', (css.match(/--jcc-accent:/g) || []).length >= 4)
+          check('launcher styles present', css.indexOf('.jcc-orb') !== -1)
+
+          var orb = document.querySelector('.jcc-orb')
+          var panel = document.getElementById('dsh-jcc-panel')
+          check('orb rendered', !!orb)
+          check('panel rendered and closed', !!panel && panel.hidden === true)
+          check('orb collapsed', orb && orb.getAttribute('aria-expanded') === 'false')
+
+          orb.click()
+          check('panel opens', panel.hidden === false)
+          check('orb expanded', orb.getAttribute('aria-expanded') === 'true')
+          check('switch starts on', panel.querySelector('[data-jcc="toggle"]').getAttribute('aria-checked') === 'true')
+
+          panel.querySelector('[data-accent="cyan"]').click()
+          check('accent switches to cyan', document.documentElement.dataset.jccAccent === 'cyan')
+          check('cyan swatch is pressed', panel.querySelector('[data-accent="cyan"]').getAttribute('aria-pressed') === 'true')
+          check('gold swatch released', panel.querySelector('[data-accent="gold"]').getAttribute('aria-pressed') === 'false')
+
+          panel.querySelector('[data-texture="vivid"]').click()
+          check('texture switches to vivid', document.documentElement.dataset.jccTexture === 'vivid')
+          check('vivid segment pressed', panel.querySelector('[data-texture="vivid"]').getAttribute('aria-pressed') === 'true')
+
+          panel.querySelector('[data-jcc="toggle"]').click()
+          check('theme switches off', document.documentElement.dataset.jcc === 'off')
+          check('switch reflects off', panel.querySelector('[data-jcc="toggle"]').getAttribute('aria-checked') === 'false')
+
+          panel.querySelector('[data-jcc="reset"]').click()
+          check(
+            'reset restores defaults',
+            document.documentElement.dataset.jcc === 'on' &&
+              document.documentElement.dataset.jccAccent === 'gold' &&
+              document.documentElement.dataset.jccTexture === 'normal'
+          )
+
+          /* Outside click closes the panel. */
+          document.body.click()
+          check('outside click closes', panel.hidden === true)
+
+          /* Escape closes and refocuses the orb. */
+          orb.click()
+          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+          check('escape closes', panel.hidden === true)
+
+          /* The fiber lifecycle: apply() re-mounts, its disposer unloads. */
+          var dispose = null
+          api.apply({
+            effect: function (callback) {
+              dispose = callback()
+            }
+          })
+          check('apply remounts a single orb', document.querySelectorAll('.jcc-orb').length === 1)
+          check('apply keeps one panel', document.querySelectorAll('.jcc-panel').length === 1)
+          check('apply keeps one style tag', document.querySelectorAll('#dsh-jcc-theme-style').length === 1)
+
+          dispose()
+          check('dispose removes the style', !document.getElementById('dsh-jcc-theme-style'))
+          check('dispose removes the orb', !document.querySelector('.jcc-orb'))
+          check('dispose removes the panel', !document.querySelector('.jcc-panel'))
+          check('dispose clears attributes', document.documentElement.dataset.jcc === undefined)
+
+          var passed = results.every(function (line) {
+            return line.indexOf('PASS ') === 0
+          })
+          document.body.dataset.test = passed ? 'PASS' : 'FAIL'
+          document.getElementById('result').textContent = results.join('\n')
+        } catch (error) {
+          document.body.dataset.test = 'FAIL'
+          document.getElementById('result').textContent =
+            'FAIL threw — ' + (error && error.stack ? error.stack : String(error))
+        }
+      })()
+    </script>
+  </body>
+</html>

@@ -1,0 +1,622 @@
+/*
+ * dsh-jcc-theme — static stylesheet.
+ *
+ * The colour tokens (--dsw-alias-*) are generated in client.js from the same
+ * palette table that feeds every accent, so this file holds only what does not
+ * depend on a colour scheme by itself: the page canvas, the hex board, and the
+ * floating hex-core panel.
+ *
+ * Conventions
+ *   - every page-level rule is gated on :root[data-jcc="on"], so switching the
+ *     theme off restores the stock UI without unloading the bundle;
+ *   - the launcher keeps its own dark HUD colours instead of reading page
+ *     tokens, so it stays legible while the theme is off (that is when you
+ *     need it to turn the theme back on).
+ */
+
+/* ── 0. Own variables ───────────────────────────────────────────────────── */
+
+:root {
+  /* Overwritten per accent by the generated sheet; these are the fallbacks. */
+  --jcc-accent: #e8c477;
+  --jcc-accent-2: #f6e3b4;
+  --jcc-accent-deep: #a97f2e;
+
+  --jcc-grid: 44px;
+  --jcc-grid-p: 7%;
+  --jcc-grid-p2: 4.5%;
+
+  --jcc-hud-bg: #0a0f1b;
+  --jcc-hud-bg-2: #121a2b;
+  --jcc-hud-line: rgba(232, 196, 119, 0.26);
+  --jcc-hud-text: #f3ebd9;
+  --jcc-hud-text-2: #c3b79e;
+  --jcc-hud-text-3: #8d8370;
+  --jcc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+:root[data-jcc="on"][data-jcc-texture="subtle"] {
+  --jcc-grid: 58px;
+  --jcc-grid-p: 4.5%;
+  --jcc-grid-p2: 3%;
+}
+
+:root[data-jcc="on"][data-jcc-texture="normal"] {
+  --jcc-grid: 44px;
+  --jcc-grid-p: 7%;
+  --jcc-grid-p2: 4.5%;
+}
+
+:root[data-jcc="on"][data-jcc-texture="vivid"] {
+  --jcc-grid: 32px;
+  --jcc-grid-p: 11%;
+  --jcc-grid-p2: 7%;
+}
+
+/* ── 1. The board: canvas, hex lattice, ambient hextech light ───────────── */
+
+/* The product paints the app frame (and each page root) with
+   `--dsw-alias-bg-base`, which covers the body canvas. client.js marks those
+   full-viewport canvas layers at runtime; only they go transparent, so sticky
+   headers and cards that also use the token keep their opaque fill. */
+:root[data-jcc="on"] .jcc-canvas {
+  background-color: transparent !important;
+}
+
+:root[data-jcc="on"] body {
+  background-attachment: fixed;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+}
+
+:root[data-jcc="on"] body:not([data-ds-dark-theme]) {
+  --jcc-deco: var(--jcc-accent-deep);
+  background-color: #f7f1e3;
+  background-image:
+    radial-gradient(
+      1100px 560px at 50% -220px,
+      color-mix(in srgb, var(--jcc-accent) 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      900px 500px at 104% 108%,
+      color-mix(in srgb, var(--jcc-accent-2) 10%, transparent),
+      transparent 72%
+    ),
+    repeating-linear-gradient(
+      60deg,
+      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,
+      transparent 1px var(--jcc-grid)
+    ),
+    repeating-linear-gradient(
+      -60deg,
+      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,
+      transparent 1px var(--jcc-grid)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p2), transparent) 0 1px,
+      transparent 1px calc(var(--jcc-grid) * 0.86)
+    );
+}
+
+:root[data-jcc="on"] body[data-ds-dark-theme] {
+  --jcc-deco: var(--jcc-accent);
+  background-color: #080b14;
+  background-image:
+    radial-gradient(
+      1200px 620px at 50% -240px,
+      color-mix(in srgb, var(--jcc-accent) 15%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      1000px 560px at 106% 110%,
+      color-mix(in srgb, var(--jcc-accent) 9%, transparent),
+      transparent 72%
+    ),
+    repeating-linear-gradient(
+      60deg,
+      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,
+      transparent 1px var(--jcc-grid)
+    ),
+    repeating-linear-gradient(
+      -60deg,
+      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,
+      transparent 1px var(--jcc-grid)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p2), transparent) 0 1px,
+      transparent 1px calc(var(--jcc-grid) * 0.86)
+    );
+}
+
+/* A thin arcane seam along the top edge of the viewport. */
+:root[data-jcc="on"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 1px;
+  z-index: 2147482000;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--jcc-accent) 78%, transparent) 22%,
+    color-mix(in srgb, var(--jcc-accent-2) 90%, transparent) 50%,
+    color-mix(in srgb, var(--jcc-accent) 78%, transparent) 78%,
+    transparent
+  );
+  opacity: 0.7;
+}
+
+:root[data-jcc="on"] ::selection {
+  background: color-mix(in srgb, var(--jcc-accent) 38%, transparent);
+}
+
+/* ── 2. Launcher: the hex core in the bottom-right corner ───────────────── */
+
+.jcc-dock {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483000;
+  width: 46px;
+  height: 52px;
+  pointer-events: none;
+}
+
+.jcc-dock *,
+.jcc-panel *,
+.jcc-panel {
+  box-sizing: border-box;
+}
+
+.jcc-halo {
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 66%,
+    color-mix(in srgb, var(--jcc-accent) 85%, transparent) 84%,
+    transparent 100%
+  );
+  filter: blur(9px);
+  opacity: 0.55;
+  animation: jcc-orbit 9s linear infinite;
+  pointer-events: none;
+}
+
+.jcc-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  color: var(--jcc-accent-2);
+  background: linear-gradient(
+    165deg,
+    var(--jcc-accent-2),
+    var(--jcc-accent) 48%,
+    var(--jcc-accent-deep)
+  );
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.4));
+  transition: transform 0.18s var(--jcc-ease), filter 0.18s var(--jcc-ease);
+}
+
+.jcc-orb::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  clip-path: inherit;
+  background:
+    radial-gradient(circle at 50% 26%, #243352, #0a0f1b 74%),
+    repeating-linear-gradient(
+      60deg,
+      rgba(255, 255, 255, 0.05) 0 1px,
+      transparent 1px 9px
+    );
+}
+
+.jcc-orb svg {
+  position: relative;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--jcc-accent) 65%, transparent));
+}
+
+.jcc-orb:hover {
+  transform: translateY(-1px) scale(1.04);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--jcc-accent) 45%, transparent));
+}
+
+.jcc-orb:active {
+  transform: scale(0.97);
+}
+
+.jcc-orb:focus-visible {
+  outline: none;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--jcc-accent) 85%, transparent));
+}
+
+.jcc-orb:focus-visible::before {
+  inset: 4px;
+  box-shadow: inset 0 0 0 2px var(--jcc-accent-2);
+}
+
+.jcc-dock:has(.jcc-orb:focus-visible)::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 2px solid var(--jcc-accent-2);
+  border-radius: 16px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.jcc-orb.is-open {
+  transform: scale(0.96);
+}
+
+:root[data-jcc="off"] .jcc-halo {
+  opacity: 0.12;
+  animation: none;
+}
+
+:root[data-jcc="off"] .jcc-orb {
+  filter: grayscale(0.55) brightness(0.86) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+}
+
+/* ── 3. Panel: the hex-core HUD ─────────────────────────────────────────── */
+
+.jcc-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 82px;
+  z-index: 2147483001;
+  width: 278px;
+  max-height: calc(100vh - 160px);
+  overflow: auto;
+  padding: 14px 14px 12px;
+  color: var(--jcc-hud-text);
+  background:
+    radial-gradient(
+      220px 140px at 100% 0,
+      color-mix(in srgb, var(--jcc-accent) 12%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, #131c2e, var(--jcc-hud-bg) 72%);
+  border: 1px solid color-mix(in srgb, var(--jcc-accent) 42%, transparent);
+  border-radius: 16px;
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 0 40px -14px color-mix(in srgb, var(--jcc-accent) 60%, transparent);
+  font: 400 13px/1.45 var(--dsw-font-family, system-ui, sans-serif);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  backdrop-filter: blur(18px) saturate(1.1);
+  animation: jcc-pop 0.18s var(--jcc-ease);
+}
+
+.jcc-panel[hidden] {
+  display: none;
+}
+
+.jcc-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--jcc-accent) 80%, transparent),
+    transparent
+  );
+}
+
+.jcc-panel button:focus-visible {
+  outline: 2px solid var(--jcc-accent-2);
+  outline-offset: 2px;
+}
+
+.jcc-panel__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--jcc-hud-line);
+}
+
+.jcc-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.jcc-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 34px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: linear-gradient(160deg, var(--jcc-accent-2), var(--jcc-accent-deep));
+  color: #10131c;
+}
+
+.jcc-mark svg {
+  width: 15px;
+  height: 15px;
+}
+
+.jcc-brand b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+}
+
+.jcc-brand small {
+  display: block;
+  margin-top: 2px;
+  color: var(--jcc-hud-text-3);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.jcc-x {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--jcc-hud-text-3);
+  background: transparent;
+  cursor: pointer;
+}
+
+.jcc-x:hover {
+  color: var(--jcc-hud-text);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.jcc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 0;
+}
+
+.jcc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 11px 0;
+}
+
+.jcc-row + .jcc-field,
+.jcc-field + .jcc-field {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.jcc-label {
+  color: var(--jcc-hud-text-2);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+}
+
+.jcc-label em {
+  margin-left: 5px;
+  color: var(--jcc-hud-text-3);
+  font-size: 10.5px;
+  font-style: normal;
+}
+
+/* switch */
+.jcc-switch {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--jcc-accent) 40%, transparent);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+}
+
+.jcc-switch > span {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--jcc-hud-text-3);
+  transition: transform 0.18s var(--jcc-ease), background 0.18s;
+}
+
+.jcc-switch[aria-checked="true"] {
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--jcc-accent-deep), var(--jcc-accent));
+}
+
+.jcc-switch[aria-checked="true"] > span {
+  transform: translateX(18px);
+  background: #12100a;
+}
+
+/* accent swatches */
+.jcc-swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.jcc-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: var(--jcc-hud-text-3);
+  background: transparent;
+  font: inherit;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.jcc-swatch:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.jcc-swatch[aria-pressed="true"] {
+  color: var(--jcc-hud-text);
+  border-color: color-mix(in srgb, var(--jcc-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--jcc-accent) 10%, transparent);
+}
+
+.jcc-hex {
+  width: 22px;
+  height: 25px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: linear-gradient(160deg, #f6e3b4, #c99a2e 60%, #8a6413);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.jcc-swatch[data-accent="cyan"] .jcc-hex {
+  background: linear-gradient(160deg, #a8fff3, #2ec4b6 60%, #0b6b63);
+}
+
+.jcc-swatch[data-accent="violet"] .jcc-hex {
+  background: linear-gradient(160deg, #e2d6ff, #9b7bea 60%, #5b3bbd);
+}
+
+/* texture segmented control */
+.jcc-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.jcc-seg button {
+  padding: 5px 0;
+  border: 0;
+  border-radius: 7px;
+  color: var(--jcc-hud-text-3);
+  background: transparent;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.jcc-seg button[aria-pressed="true"] {
+  color: var(--jcc-hud-text);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.jcc-panel__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid var(--jcc-hud-line);
+  color: var(--jcc-hud-text-3);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+
+.jcc-reset {
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--jcc-accent-2);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.jcc-reset:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── 4. Motion ──────────────────────────────────────────────────────────── */
+
+@keyframes jcc-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes jcc-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+
+/* ── 5. Small screens ───────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .jcc-dock {
+    right: 12px;
+    bottom: 92px;
+    transform: scale(0.94);
+    transform-origin: bottom right;
+  }
+
+  .jcc-panel {
+    right: 12px;
+    bottom: 152px;
+    width: min(278px, calc(100vw - 24px));
+    max-height: calc(100vh - 240px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jcc-halo {
+    animation: none;
+  }
+
+  .jcc-panel {
+    animation: none;
+  }
+
+  .jcc-orb,
+  .jcc-switch,
+  .jcc-switch > span,
+  .jcc-swatch {
+    transition: none;
+  }
+}
