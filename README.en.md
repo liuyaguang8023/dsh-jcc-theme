@@ -1,9 +1,9 @@
 # dsh-jcc-theme — Golden Spatula · Hextech Core
 
 An unofficial **Golden Spatula (金铲铲) fan theme** for the DeepSeek Harness Web GUI:
-hextech gold and arcane accents, a hexagonal board lattice behind the interface, and a
-floating hex-core launcher for switching the accent colour and board texture — or turning
-the whole thing off.
+an original hextech arena backdrop with a golden spatula crest, hextech gold and arcane
+accents, a hexagonal board lattice, and a floating hex-core launcher for switching the
+accent colour and board texture — or turning the whole thing off.
 
 > Unofficial fan work, not affiliated with Tencent or Riot Games. No game assets are
 > included: every icon and pattern here is original CSS/SVG geometry. “金铲铲之战” and
@@ -13,8 +13,11 @@ the whole thing off.
 
 ## What it does
 
-- **Light and dark** — parchment board for light, arcane navy for dark. It follows the
-  host's Light / Dark / System preference; there is no second appearance switch.
+- **Light and dark** — a parchment chart for light, an arcane arena for dark. It follows
+  the host's Light / Dark / System preference; there is no second appearance switch.
+- **Original backdrop** — the dark scene is a hexagonal arena with a golden spatula crest
+  and floating hex crystals; the light one is an old chart with contours, a compass and the
+  same crest. Both are inline SVG data URIs, so no image is ever fetched.
 - **Three augments** — Hextech Gold, Arcane Cyan, Fury Violet. Borders, brand fills,
   links, focus rings and sidebar selection all follow the choice, live.
 - **Three board textures** — Subtle / Standard / Vivid, controlling the lattice and the
@@ -69,9 +72,10 @@ The choice lives in `localStorage` under `dsh-jcc/v1`
 - **Colour** — `src/client.js` generates `--dsw-alias-*` tokens per accent and scheme,
   scoped to selectors more specific than the product's own
   `body[data-ds-dark-theme]` rule, so overrides win and revert cleanly.
-- **Texture** — three `repeating-linear-gradient`s (0° / ±60°) form the lattice, with two
-  radial ambient lights; `background-attachment: fixed` keeps it still while messages
-  scroll. The app frame and each page root cover that canvas with `--dsw-alias-bg-base`,
+- **Backdrop** — two original SVG scenes are encoded into data URIs at build time and used
+  as the first `body` background layer, followed by three `repeating-linear-gradient`s
+  (0° / ±60°) and two radial ambient lights. `background-attachment: fixed` keeps the whole
+  layer still while messages scroll. The app frame and each page root cover that canvas with `--dsw-alias-bg-base`,
   so the client marks only the full-viewport canvas layers transparent at runtime —
   sticky headers, cards and attachments keep their opaque fill.
 - **Panel** — plain DOM and CSS. No React, no `slots`, no host API, so a component rename

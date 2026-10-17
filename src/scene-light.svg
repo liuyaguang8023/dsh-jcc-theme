@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <radialGradient id="paper" cx=".5" cy=".42" r=".78">
+      <stop offset="0" stop-color="#fdf9f0"/>
+      <stop offset=".58" stop-color="#f7efdd"/>
+      <stop offset="1" stop-color="#eadfc6"/>
+    </radialGradient>
+    <radialGradient id="sun" cx=".62" cy=".12" r=".58">
+      <stop offset="0" stop-color="#fff8e6" stop-opacity=".95"/>
+      <stop offset=".5" stop-color="#f6e3b4" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#f6e3b4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="core" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#e8c477" stop-opacity=".32"/>
+      <stop offset=".55" stop-color="#c99a2e" stop-opacity=".1"/>
+      <stop offset="1" stop-color="#a8822f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1=".1" y1="0" x2=".9" y2="1">
+      <stop offset="0" stop-color="#e8c477"/>
+      <stop offset=".45" stop-color="#c99a2e"/>
+      <stop offset="1" stop-color="#8a6413"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx=".5" cy=".44" r=".82">
+      <stop offset=".52" stop-color="#8a6d3b" stop-opacity="0"/>
+      <stop offset="1" stop-color="#8a6d3b" stop-opacity=".22"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3e8cf" stop-opacity="0"/>
+      <stop offset=".7" stop-color="#f3e8cf" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#f3e8cf" stop-opacity=".92"/>
+    </linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <symbol id="hex" viewBox="-10 -10 20 20">
+      <path d="M0-10 8.66-5 8.66 5 0 10-8.66 5-8.66-5Z" fill="none" stroke="#a8822f" stroke-width=".9"/>
+    </symbol>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#paper)"/>
+  <rect width="1600" height="1000" fill="url(#sun)"/>
+
+  <!-- old chart contours -->
+  <g fill="none" stroke="#a8822f" stroke-opacity=".08">
+    <path d="M-120 128C220 72 430 196 760 148S1330 66 1720 138"/>
+    <path d="M-120 188C240 130 450 258 780 206S1350 124 1720 196"/>
+    <path d="M-120 252C200 198 480 314 800 262S1360 184 1720 256"/>
+    <path d="M-120 322C260 268 500 382 820 330S1380 250 1720 322"/>
+    <path d="M-120 398C240 344 520 456 840 404S1400 324 1720 396"/>
+    <path d="M-120 480C280 424 540 536 860 484S1420 404 1720 476"/>
+    <path d="M-120 566C240 512 560 620 880 568S1440 488 1720 560"/>
+  </g>
+  <g fill="#a8822f" opacity=".18">
+    <circle cx="286" cy="132" r="1.4"/>
+    <circle cx="612" cy="198" r="1.1"/>
+    <circle cx="944" cy="146" r="1.3"/>
+    <circle cx="1268" cy="210" r="1.1"/>
+    <circle cx="372" cy="338" r="1.2"/>
+    <circle cx="1084" cy="368" r="1.4"/>
+    <circle cx="696" cy="470" r="1.1"/>
+    <circle cx="1436" cy="474" r="1.3"/>
+    <circle cx="182" cy="566" r="1.2"/>
+    <circle cx="1232" cy="586" r="1.1"/>
+  </g>
+
+  <!-- arena floor -->
+  <ellipse cx="800" cy="596" rx="600" ry="48" fill="url(#core)" opacity=".5"/>
+  <path d="M-80 610Q800 552 1680 610" fill="none" stroke="#a8822f" stroke-opacity=".12"/>
+  <g fill="none" stroke="#a8822f" stroke-opacity=".07">
+    <path d="M800 590L-260 1000M800 590L-40 1000M800 590L180 1000M800 590L400 1000M800 590L620 1000M800 590L800 1000M800 590L980 1000M800 590L1200 1000M800 590L1420 1000M800 590L1620 1000M800 590L1860 1000"/>
+    <path d="M-140 706Q800 650 1740 706"/>
+    <path d="M-140 792Q800 730 1740 792"/>
+    <path d="M-140 896Q800 826 1740 896"/>
+    <path d="M-140 1010Q800 930 1740 1010"/>
+  </g>
+
+  <!-- arena rings -->
+  <g fill="none" stroke="url(#gold)">
+    <path d="M800 306 1215.7 546V1026L800 1266 384.3 1026V546Z" stroke-opacity=".1" stroke-width="1.1"/>
+    <path d="M800 486 1059.8 636v300L800 1086 540.2 936V636Z" stroke-opacity=".16" stroke-width="1.2"/>
+    <path d="M800 626 940 706v160L800 946 660 866V706Z" stroke-opacity=".22" stroke-width="1.4"/>
+    <circle cx="800" cy="786" r="466" stroke-dasharray="2 18" stroke-opacity=".12"/>
+  </g>
+
+  <!-- golden spatula watermark -->
+  <ellipse cx="1470" cy="306" rx="250" ry="230" fill="url(#core)" opacity=".45" filter="url(#soft)"/>
+  <path d="M1470 126 1625.9 216V396L1470 486 1314.1 396V216Z" fill="none" stroke="url(#gold)" stroke-opacity=".12" stroke-width="1.2"/>
+
+  <g transform="translate(1470 306) rotate(-12) scale(11) translate(-12 -12)" opacity=".18">
+    <ellipse cx="12" cy="13" rx="20" ry="16" fill="url(#core)" filter="url(#soft)"/>
+    <g fill="url(#gold)">
+      <path d="M14.4 3.2c1.9-.6 3.9-.3 5.5 1.1 1.4 1.6 1.7 3.6 1.1 5.5-.2.8-.7 1.5-1.3 2.1l-1.1 1.1-7.4-7.4 1.1-1.1c.6-.6 1.3-1.1 2.1-1.3Z"/>
+      <path d="M11.7 8.2 4.2 15.7" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- compass rose -->
+  <g transform="translate(212 812)" fill="none" stroke="#a8822f" opacity=".16">
+    <circle r="86" stroke-opacity=".5"/>
+    <circle r="58" stroke-dasharray="1 9"/>
+    <path d="M0-86V86M-86 0H86M-61-61 61 61M61-61-61 61" stroke-opacity=".35"/>
+    <path d="M0-22 8 0 0 22-8 0Z" fill="#a8822f" stroke="none" opacity=".7"/>
+  </g>
+
+  <!-- floating hexes -->
+  <g>
+    <use href="#hex" x="262" y="220" width="30" height="30" opacity=".2"/>
+    <use href="#hex" x="1216" y="470" width="20" height="20" opacity=".16"/>
+    <use href="#hex" x="442" y="592" width="26" height="26" opacity=".16"/>
+    <use href="#hex" x="1438" y="752" width="24" height="24" opacity=".14"/>
+    <use href="#hex" x="1046" y="154" width="16" height="16" opacity=".18"/>
+    <use href="#hex" x="590" y="252" width="18" height="18" opacity=".15"/>
+    <circle cx="279" cy="235" r="2" fill="#a8822f" opacity=".26"/>
+  </g>
+
+  <rect width="1600" height="1000" fill="url(#vignette)"/>
+  <rect y="560" width="1600" height="440" fill="url(#floor)"/>
+</svg>

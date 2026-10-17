@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1 — 2026-10-17
+
+- Original backdrop: a hextech night arena with a golden spatula crest for dark mode, and a
+  parchment chart with contours, a compass and the same crest for light mode. Both scenes are
+  inline SVG data URIs — no extra request, no game assets.
+- The generated scenes sit under the hex lattice and the two ambient lights; the canvas-layer
+  handling is unchanged.
+- Market copy and screenshots updated for the new backdrop.
+
+
 ## 0.1.0 — 2026-10-17
 
 First release.

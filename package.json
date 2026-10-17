@@ -1,7 +1,7 @@
 {
   "name": "dsh-jcc-theme",
-  "version": "0.1.0",
-  "description": "Golden Spatula fan theme for the DeepSeek Harness Web GUI: hextech gold and arcane accents, a hex-board backdrop, and a floating hex-core panel for accent and texture. 金铲铲同人主题：海克斯金与奥术配色、六边形棋盘底纹、海克斯核心面板。",
+  "version": "0.1.1",
+  "description": "Golden Spatula fan theme for the DeepSeek Harness Web GUI: an original hextech arena backdrop with a golden spatula crest, hextech gold and arcane token palettes, a hex-board lattice, and a floating hex-core panel for accent and texture. 金铲铲同人主题：原创海克斯竞技场背景、金色铲影、海克斯金与奥术配色、海克斯核心面板。",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

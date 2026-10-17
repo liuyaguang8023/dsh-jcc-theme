@@ -65,13 +65,17 @@
 
 :root[data-jcc="on"] body {
   background-attachment: fixed;
-  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+  background-position: center;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: cover, auto, auto, auto, auto, auto;
 }
 
 :root[data-jcc="on"] body:not([data-ds-dark-theme]) {
   --jcc-deco: var(--jcc-accent-deep);
+  --jcc-scene: url("__SCENE_LIGHT__");
   background-color: #f7f1e3;
   background-image:
+    var(--jcc-scene, none),
     radial-gradient(
       1100px 560px at 50% -220px,
       color-mix(in srgb, var(--jcc-accent) 16%, transparent),
@@ -101,8 +105,10 @@
 
 :root[data-jcc="on"] body[data-ds-dark-theme] {
   --jcc-deco: var(--jcc-accent);
+  --jcc-scene: url("__SCENE_DARK__");
   background-color: #080b14;
   background-image:
+    var(--jcc-scene, none),
     radial-gradient(
       1200px 620px at 50% -240px,
       color-mix(in srgb, var(--jcc-accent) 15%, transparent),

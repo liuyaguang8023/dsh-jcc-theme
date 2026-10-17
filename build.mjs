@@ -1,9 +1,10 @@
 /**
- * Assemble client/index.js from src/client.js + src/theme.css.
+ * Assemble client/index.js from src/client.js, src/theme.css and the two
+ * backdrop scenes.
  *
  * The browser bundle is committed, so a source checkout installs without a
- * build step; this script only exists to keep the stylesheet editable as CSS
- * instead of a JS string literal.
+ * build step; this script exists to keep the stylesheet editable as CSS and
+ * the scenes editable as SVG instead of JS string literals.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -12,9 +13,25 @@ import { fileURLToPath } from 'node:url'
 const root = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
 
-const css = await readFile(join(root, 'src/theme.css'), 'utf8')
-const template = await readFile(join(root, 'src/client.js'), 'utf8')
+/** A self-contained SVG background: no extra request, no CSP surprise. */
+function svgDataUri(svg) {
+  const compact = svg.replace(/\s+/g, ' ').replace(/>\s+</g, '><').trim()
+  return 'data:image/svg+xml,' + encodeURIComponent(compact)
+}
 
+const rawCss = await readFile(join(root, 'src/theme.css'), 'utf8')
+const darkScene = await readFile(join(root, 'src/scene-dark.svg'), 'utf8')
+const lightScene = await readFile(join(root, 'src/scene-light.svg'), 'utf8')
+
+const css = rawCss
+  .replaceAll('__SCENE_DARK__', svgDataUri(darkScene))
+  .replaceAll('__SCENE_LIGHT__', svgDataUri(lightScene))
+
+for (const leftover of ['__SCENE_DARK__', '__SCENE_LIGHT__']) {
+  if (css.includes(leftover)) throw new Error(`${leftover} was not replaced`)
+}
+
+const template = await readFile(join(root, 'src/client.js'), 'utf8')
 if (!template.includes('__CSS__') || !template.includes('__VERSION__')) {
   throw new Error('src/client.js is missing the __CSS__ / __VERSION__ placeholders')
 }

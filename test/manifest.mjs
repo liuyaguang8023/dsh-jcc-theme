@@ -49,10 +49,15 @@ assert.match(host, /export function apply\(\)/)
 const client = await read('client/index.js')
 assert.ok(!client.includes('__CSS__'), 'CSS placeholder was replaced')
 assert.ok(!client.includes('__VERSION__'), 'version placeholder was replaced')
+assert.ok(!client.includes('__SCENE_'), 'scene placeholders were replaced')
 assert.ok(client.includes("var PKG = 'dsh-jcc-theme'"))
 assert.ok(client.includes('__ModuleLoader__.load'))
 assert.ok(client.includes('.jcc-orb'), 'static stylesheet is inlined')
 assert.ok(client.includes('--dsw-alias-bg-base'), 'palette is inlined')
+assert.ok(
+  (client.match(/data:image\/svg\+xml,/g) || []).length === 2,
+  'both SVG scenes are inlined'
+)
 
 /* The browser half must not reach the network. */
 assert.ok(!/fetch\s*\(/.test(client), 'no fetch in the client bundle')
