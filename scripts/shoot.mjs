@@ -44,6 +44,10 @@ const shots = [
   {
     file: 'screenshot-sharp.png',
     query: 'scheme=dark&accent=blue&texture=vivid&corners=sharp&panel=1'
+  },
+  {
+    file: 'screenshot-draft.png',
+    query: 'scheme=dark&accent=gold&draft=1'
   }
 ]
 

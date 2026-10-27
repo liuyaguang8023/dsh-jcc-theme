@@ -106,6 +106,60 @@
               document.documentElement.dataset.jccCorners === 'soft'
           )
 
+          /* Augment draft: three cards, three accents, one pick. */
+          var draftBtn = panel.querySelector('[data-jcc="draft"]')
+          check('draft entry present', !!draftBtn)
+          draftBtn.click()
+          var draft = document.getElementById('dsh-jcc-draft')
+          check('draft opens', !!draft && draft.hidden === false)
+          var draftCards = draft.querySelectorAll('.jcc-card')
+          check('draft deals three cards', draftCards.length === 3)
+          var draftIds = Array.prototype.map.call(draftCards, function (card) { return card.dataset.card })
+          check('draft cards are distinct', new Set(draftIds).size === 3)
+          var draftAccents = draftIds.map(function (id) { return id.split('-')[0] })
+          check('draft accents are distinct', new Set(draftAccents).size === 3)
+
+          var chosen = draftCards[0]
+          var chosenParts = chosen.dataset.card.split('-')
+          chosen.click()
+          check('draft applies accent', document.documentElement.dataset.jccAccent === chosenParts[0])
+          check('draft applies texture', document.documentElement.dataset.jccTexture === chosenParts[1])
+          check('draft closes after pick', draft.hidden === true)
+          check('collection counts the pick', panel.querySelector('[data-jcc-count]').textContent === '1')
+          var savedAfterPick = JSON.parse(localStorage.getItem('dsh-jcc/v1'))
+          check('collection persists', savedAfterPick.collection.length === 1)
+
+          /* Codex: 12 slots, only owned ones usable. */
+          panel.querySelector('[data-jcc="codex"]').click()
+          var codex = document.getElementById('dsh-jcc-codex')
+          check('codex opens', !!codex && codex.hidden === false)
+          check('codex has twelve slots', codex.querySelectorAll('.jcc-codex-card').length === 12)
+          var unlocked = codex.querySelectorAll('.jcc-codex-card:not([disabled])')
+          check('codex unlocks only owned', unlocked.length === 1)
+          var locked = codex.querySelector('.jcc-codex-card[disabled]')
+          var accentBeforeLocked = document.documentElement.dataset.jccAccent
+          locked.click()
+          check('locked card does not apply', document.documentElement.dataset.jccAccent === accentBeforeLocked)
+          check('codex stays open on locked', codex.hidden === false)
+          unlocked[0].click()
+          check('owned card applies and closes', codex.hidden === true)
+
+          /* Reset is appearance-only: the collection survives. */
+          panel.querySelector('[data-jcc="reset"]').click()
+          check('reset keeps the collection', panel.querySelector('[data-jcc-count]').textContent === '1')
+
+          /* Clear is a two-click action, no dialog. */
+          panel.querySelector('[data-jcc="codex"]').click()
+          var clearBtn = codex.querySelector('[data-jcc="clear"]')
+          clearBtn.click()
+          check('clear needs a second click', codex.querySelector('[data-jcc="clear"]').textContent.indexOf('再点') !== -1)
+          codex.querySelector('[data-jcc="clear"]').click()
+          check('collection clears', panel.querySelector('[data-jcc-count]').textContent === '0')
+          check('codex locks everything', codex.querySelectorAll('.jcc-codex-card:not([disabled])').length === 0)
+          check('cleared collection persists', JSON.parse(localStorage.getItem('dsh-jcc/v1')).collection.length === 0)
+          codex.querySelector('[data-jcc="dismiss"]').click()
+          check('codex closes', codex.hidden === true)
+
           /* Outside click closes the panel. */
           document.body.click()
           check('outside click closes', panel.hidden === true)
@@ -131,6 +185,8 @@
           check('dispose removes the orb', !document.querySelector('.jcc-orb'))
           check('dispose removes the panel', !document.querySelector('.jcc-panel'))
           check('dispose removes the ambience', !document.getElementById('dsh-jcc-ambience'))
+          check('dispose removes the draft', !document.getElementById('dsh-jcc-draft'))
+          check('dispose removes the codex', !document.getElementById('dsh-jcc-codex'))
           check('dispose clears attributes', document.documentElement.dataset.jcc === undefined)
 
           var passed = results.every(function (line) {

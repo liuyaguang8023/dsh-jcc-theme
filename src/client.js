@@ -25,6 +25,8 @@
   var DOCK_ID = 'dsh-jcc-dock'
   var PANEL_ID = 'dsh-jcc-panel'
   var AMBIENCE_ID = 'dsh-jcc-ambience'
+  var DRAFT_ID = 'dsh-jcc-draft'
+  var CODEX_ID = 'dsh-jcc-codex'
   var STORE_KEY = 'dsh-jcc/v1'
   var ACCENT_IDS = ['gold', 'cyan', 'violet', 'blue']
   var CORNERS = ['soft', 'sharp']
@@ -203,6 +205,23 @@
     }
   }
 
+  /** The 12 cosmetic cards: every accent × texture pair. */
+  var CARDS = []
+  var CARD_IDS = []
+  var CARD_BY_ID = Object.create(null)
+  for (var ca = 0; ca < ACCENT_IDS.length; ca += 1) {
+    for (var ct = 0; ct < TEXTURES.length; ct += 1) {
+      var cardDef = {
+        id: ACCENT_IDS[ca] + '-' + TEXTURES[ct],
+        accent: ACCENT_IDS[ca],
+        texture: TEXTURES[ct]
+      }
+      CARDS.push(cardDef)
+      CARD_IDS.push(cardDef.id)
+      CARD_BY_ID[cardDef.id] = cardDef
+    }
+  }
+
   /** One accent's derived tokens. `line` is a six-digit hex; alpha is appended. */
   function accentTokens(id, scheme) {
     var a = ACCENTS[id][scheme]
@@ -303,6 +322,28 @@
       cornersSoft: '圆润',
       cornersSharp: '锐利',
       ambience: '氛围光效',
+      draft: '海克斯强化',
+      draftSub: '三选一 · 无限重抽',
+      cardTextures: ['淡纹', '标准', '浓烈'],
+      codexShort: '图鉴',
+      codexView: '查看',
+      codex: '海克斯图鉴',
+      codexSub: '收集 12 张外观卡',
+      equip: '装备',
+      owned: '已拥有',
+      locked: '未解锁',
+      collected: '已收集',
+      redraw: '重新抽取',
+      clear: '清空收集',
+      clearConfirm: '再点一次清空',
+      allCollected: '全图鉴',
+      goDraw: '去抽取',
+      flavors: {
+        gold: '金币在棋盘边缘燃烧。',
+        cyan: '奥术在六边形之间流动。',
+        violet: '紫电压住了最后一排。',
+        blue: '星光落在最后一格。'
+      },
       reset: '恢复默认',
       close: '关闭',
       open: '金铲铲主题设置',
@@ -322,6 +363,28 @@
       cornersSoft: 'Soft',
       cornersSharp: 'Sharp',
       ambience: 'Ambience',
+      draft: 'Hextech augment',
+      draftSub: 'Pick one of three · unlimited redraws',
+      cardTextures: ['Subtle', 'Standard', 'Vivid'],
+      codexShort: 'Codex',
+      codexView: 'View',
+      codex: 'Hextech codex',
+      codexSub: 'Collect all 12 appearance cards',
+      equip: 'Equip',
+      owned: 'Owned',
+      locked: 'Locked',
+      collected: 'Collected',
+      redraw: 'Draw again',
+      clear: 'Clear collection',
+      clearConfirm: 'Click again to clear',
+      allCollected: 'Full codex',
+      goDraw: 'Draw',
+      flavors: {
+        gold: 'Gold burns at the edge of the board.',
+        cyan: 'Arcana flows between the hexes.',
+        violet: 'Violet static pins the back line.',
+        blue: 'Starlight lands on the last tile.'
+      },
       reset: 'Reset',
       close: 'Close',
       open: 'Golden Spatula theme settings',
@@ -400,9 +463,23 @@
       var canvasTimer = 0
       var canvasPath = ''
       var ambience = null
+      var draftEl = null
+      var codexEl = null
+      var draftCards = []
+      var overlay = ''
+      var overlayTrigger = null
+      var clearArmed = false
+      var clearTimer = 0
 
       function readState() {
-        var fallback = { on: true, accent: 'gold', texture: 'normal', ambience: true, corners: 'soft' }
+        var fallback = {
+          on: true,
+          accent: 'gold',
+          texture: 'normal',
+          ambience: true,
+          corners: 'soft',
+          collection: []
+        }
         try {
           var raw = window.localStorage.getItem(STORE_KEY)
           if (!raw) return fallback
@@ -413,6 +490,16 @@
           if (TEXTURES.indexOf(saved.texture) !== -1) fallback.texture = saved.texture
           if (typeof saved.ambience === 'boolean') fallback.ambience = saved.ambience
           if (CORNERS.indexOf(saved.corners) !== -1) fallback.corners = saved.corners
+          if (Array.isArray(saved.collection)) {
+            var seenCards = Object.create(null)
+            for (var ci = 0; ci < saved.collection.length; ci += 1) {
+              var cardId = saved.collection[ci]
+              if (CARD_IDS.indexOf(cardId) !== -1 && !seenCards[cardId]) {
+                seenCards[cardId] = true
+                fallback.collection.push(cardId)
+              }
+            }
+          }
         } catch (error) {
           /* private mode, disabled storage, corrupt JSON — defaults are fine */
         }
@@ -471,6 +558,8 @@
         panel.setAttribute('aria-label', c.title)
         panel.innerHTML = panelHtml(c)
         syncUi()
+        if (overlay === 'draft') renderDraft(true)
+        else if (overlay === 'codex') renderCodex()
       }
 
       /* -------------------------------------------------------------------
@@ -551,7 +640,8 @@
           accent: ACCENT_IDS.indexOf(patch.accent) === -1 ? state.accent : patch.accent,
           texture: TEXTURES.indexOf(patch.texture) === -1 ? state.texture : patch.texture,
           ambience: patch.ambience === undefined ? state.ambience : Boolean(patch.ambience),
-          corners: CORNERS.indexOf(patch.corners) === -1 ? state.corners : patch.corners
+          corners: CORNERS.indexOf(patch.corners) === -1 ? state.corners : patch.corners,
+          collection: state.collection
         }
         saveState()
         applyAttributes()
@@ -611,6 +701,18 @@
           swatch('gold', c) + swatch('cyan', c) + swatch('violet', c) + swatch('blue', c) +
           '</div>' +
           '</div>' +
+          '<div class="jcc-field jcc-draft-field">' +
+          '<button type="button" class="jcc-draft-btn" data-jcc="draft">' +
+          '<span class="jcc-draft-btn__mark" aria-hidden="true">' + SPATULA_SVG + '</span>' +
+          '<span class="jcc-draft-btn__text"><b>' + c.draft + '</b><small>' + c.draftSub + '</small></span>' +
+          '<span class="jcc-draft-btn__chev" aria-hidden="true">›</span>' +
+          '</button>' +
+          '<div class="jcc-progress">' +
+          '<span class="jcc-progress__label">' + c.codexShort + ' <b data-jcc-count>0</b>/12</span>' +
+          '<span class="jcc-progress__hexes" data-jcc-hexes aria-hidden="true"></span>' +
+          '<button type="button" class="jcc-link" data-jcc="codex">' + c.codexView + '</button>' +
+          '</div>' +
+          '</div>' +
           '<div class="jcc-field">' +
           '<span class="jcc-label">' + c.texture + '</span>' +
           '<div class="jcc-seg" role="group" aria-label="' + c.texture + '">' +
@@ -651,9 +753,13 @@
         var staleDock = document.getElementById(DOCK_ID)
         var stalePanel = document.getElementById(PANEL_ID)
         var staleAmbience = document.getElementById(AMBIENCE_ID)
+        var staleDraft = document.getElementById(DRAFT_ID)
+        var staleCodex = document.getElementById(CODEX_ID)
         if (staleDock) staleDock.remove()
         if (stalePanel) stalePanel.remove()
         if (staleAmbience) staleAmbience.remove()
+        if (staleDraft) staleDraft.remove()
+        if (staleCodex) staleCodex.remove()
 
         var c = currentCopy()
         dock = document.createElement('div')
@@ -679,9 +785,24 @@
         ambience.setAttribute('aria-hidden', 'true')
         ambience.innerHTML = '<span class="jcc-aurora"></span>'
 
+        draftEl = document.createElement('div')
+        draftEl.className = 'jcc-overlay'
+        draftEl.id = DRAFT_ID
+        draftEl.hidden = true
+
+        codexEl = document.createElement('div')
+        codexEl.className = 'jcc-overlay'
+        codexEl.id = CODEX_ID
+        codexEl.hidden = true
+
         document.body.appendChild(ambience)
         document.body.appendChild(dock)
         document.body.appendChild(panel)
+        document.body.appendChild(draftEl)
+        document.body.appendChild(codexEl)
+
+        draftEl.addEventListener('click', onOverlayClick)
+        codexEl.addEventListener('click', onOverlayClick)
 
         orb = dock.querySelector('.jcc-orb')
         orb.addEventListener('click', onOrbClick)
@@ -733,6 +854,20 @@
             corners[k].getAttribute('data-corners') === state.corners ? 'true' : 'false'
           )
         }
+
+        var count = state.collection.length
+        var countEl = panel.querySelector('[data-jcc-count]')
+        if (countEl) countEl.textContent = String(count)
+        var hexes = panel.querySelector('[data-jcc-hexes]')
+        if (hexes) {
+          var hexHtml = ''
+          for (var h = 0; h < CARD_IDS.length; h += 1) {
+            hexHtml += '<i' + (isOwned(CARD_IDS[h]) ? ' class="is-on"' : '') + '></i>'
+          }
+          if (hexes.innerHTML !== hexHtml) hexes.innerHTML = hexHtml
+        }
+        var progress = panel.querySelector('.jcc-progress')
+        if (progress) progress.classList.toggle('is-complete', count === CARD_IDS.length)
       }
 
       function openPanel() {
@@ -779,6 +914,10 @@
           setState({ on: true, accent: 'gold', texture: 'normal', ambience: true, corners: 'soft' })
         } else if (control.dataset.jcc === 'ambience') {
           setState({ ambience: !state.ambience })
+        } else if (control.dataset.jcc === 'draft') {
+          openDraft()
+        } else if (control.dataset.jcc === 'codex') {
+          openCodex()
         } else if (control.dataset.accent) {
           setState({ accent: control.dataset.accent })
         } else if (control.dataset.texture) {
@@ -789,6 +928,7 @@
       }
 
       function onDocumentClick(event) {
+        if (overlay) return
         if (!open) return
         if (panel && panel.contains(event.target)) return
         if (dock && dock.contains(event.target)) return
@@ -796,6 +936,15 @@
       }
 
       function onKeyDown(event) {
+        if (overlay) {
+          if (event.key === 'Escape') {
+            event.preventDefault()
+            closeOverlay(true)
+          } else if (event.key === 'Tab') {
+            trapOverlayFocus(event)
+          }
+          return
+        }
         if (event.key === 'Escape' && open) {
           event.preventDefault()
           closePanel(true)
@@ -806,6 +955,260 @@
         readyBound = false
         mountChrome()
         syncUi()
+      }
+
+      /* -------------------------------------------------------------------
+       * Augment draft and codex
+       * ----------------------------------------------------------------- */
+
+      function isOwned(id) {
+        return state.collection.indexOf(id) !== -1
+      }
+
+      function drawCards() {
+        /* Three different accents, each with its own random texture: the
+           draft reads as three choices, not three shades of one card. */
+        var accents = ACCENT_IDS.slice()
+        var picks = []
+        while (picks.length < 3 && accents.length > 0) {
+          var accentIndex = Math.floor(Math.random() * accents.length)
+          var accent = accents.splice(accentIndex, 1)[0]
+          var texture = TEXTURES[Math.floor(Math.random() * TEXTURES.length)]
+          picks.push(accent + '-' + texture)
+        }
+        return picks
+      }
+
+      function cardName(card, c) {
+        return c.names[card.accent] + ' · ' + c.cardTextures[TEXTURES.indexOf(card.texture)]
+      }
+
+      function cardHtml(id, c, index) {
+        var card = CARD_BY_ID[id]
+        if (!card) return ''
+        var accent = ACCENTS[card.accent]
+        var owned = isOwned(id)
+        var name = cardName(card, c)
+        return (
+          '<button type="button" class="jcc-card' + (owned ? ' is-owned' : '') + '"' +
+          ' data-jcc="pick" data-card="' + id + '"' +
+          ' aria-label="' + name + '"' +
+          ' style="--card-accent:' + accent.accent + ';--card-accent-2:' + accent.accent2 +
+          ';--card-accent-deep:' + accent.accentDeep + ';animation-delay:' + index * 70 + 'ms">' +
+          (owned ? '<span class="jcc-card__badge">' + c.owned + '</span>' : '') +
+          '<span class="jcc-card__art" aria-hidden="true">' + SPATULA_SVG + '</span>' +
+          '<span class="jcc-card__name">' + name + '</span>' +
+          '<span class="jcc-card__flavor">' + c.flavors[card.accent] + '</span>' +
+          '<span class="jcc-card__tex" aria-hidden="true"></span>' +
+          '<span class="jcc-card__cta">' + c.equip + '</span>' +
+          '</button>'
+        )
+      }
+
+      function draftHtml(c) {
+        var count = state.collection.length
+        return (
+          '<div class="jcc-scrim" data-jcc="dismiss"></div>' +
+          '<div class="jcc-tray" role="dialog" aria-modal="true" aria-labelledby="dsh-jcc-draft-title">' +
+          '<div class="jcc-tray__head">' +
+          '<div class="jcc-tray__title"><b id="dsh-jcc-draft-title">' + c.draft +
+          '</b><small>' + c.draftSub + '</small></div>' +
+          (count === CARD_IDS.length ? '<span class="jcc-chip">' + c.allCollected + '</span>' : '') +
+          '<button type="button" class="jcc-x" data-jcc="dismiss" aria-label="' + c.close +
+          '" title="' + c.close + '">' + X_SVG + '</button>' +
+          '</div>' +
+          '<div class="jcc-cards">' +
+          draftCards
+            .map(function (id, i) {
+              return cardHtml(id, c, i)
+            })
+            .join('') +
+          '</div>' +
+          '<div class="jcc-tray__foot">' +
+          '<button type="button" class="jcc-tray-btn" data-jcc="redraw">' + c.redraw + '</button>' +
+          '<button type="button" class="jcc-tray-link" data-jcc="codex">' + c.codex +
+          ' <b>' + count + '</b>/12</button>' +
+          '</div>' +
+          '</div>'
+        )
+      }
+
+      function renderDraft(keep) {
+        if (!draftEl || !codexEl) return
+        if (!keep || draftCards.length === 0) draftCards = drawCards()
+        draftEl.innerHTML = draftHtml(currentCopy())
+        draftEl.hidden = false
+        codexEl.hidden = true
+        overlay = 'draft'
+        var first = draftEl.querySelector('.jcc-card')
+        if (first) first.focus({ preventScroll: true })
+      }
+
+      function codexHtml(c) {
+        var count = state.collection.length
+        var cards = CARDS.map(function (card) {
+          var accent = ACCENTS[card.accent]
+          var owned = isOwned(card.id)
+          return (
+            '<button type="button" class="jcc-codex-card' + (owned ? '' : ' is-locked') + '"' +
+            ' data-jcc="codexPick" data-card="' + card.id + '"' +
+            (owned ? '' : ' disabled') +
+            ' style="--card-accent:' + accent.accent + ';--card-accent-2:' + accent.accent2 +
+            ';--card-accent-deep:' + accent.accentDeep + '">' +
+            '<span class="jcc-codex-card__hex" aria-hidden="true"></span>' +
+            '<span class="jcc-codex-card__name">' + cardName(card, c) + '</span>' +
+            '<span class="jcc-codex-card__state">' + (owned ? c.collected : c.locked) + '</span>' +
+            '</button>'
+          )
+        }).join('')
+        return (
+          '<div class="jcc-scrim" data-jcc="dismiss"></div>' +
+          '<div class="jcc-tray" role="dialog" aria-modal="true" aria-labelledby="dsh-jcc-codex-title">' +
+          '<div class="jcc-tray__head">' +
+          '<div class="jcc-tray__title"><b id="dsh-jcc-codex-title">' + c.codex +
+          '</b><small>' + c.codexSub + '</small></div>' +
+          '<span class="jcc-chip">' + count + ' / ' + CARD_IDS.length + '</span>' +
+          '<button type="button" class="jcc-x" data-jcc="dismiss" aria-label="' + c.close +
+          '" title="' + c.close + '">' + X_SVG + '</button>' +
+          '</div>' +
+          '<div class="jcc-codex-grid">' + cards + '</div>' +
+          '<div class="jcc-tray__foot">' +
+          '<button type="button" class="jcc-tray-btn" data-jcc="draw">' + c.goDraw + '</button>' +
+          '<button type="button" class="jcc-tray-link' + (clearArmed ? ' is-danger' : '') +
+          '" data-jcc="clear"' + (count === 0 ? ' disabled' : '') + '>' +
+          (clearArmed ? c.clearConfirm : c.clear) + '</button>' +
+          '</div>' +
+          '</div>'
+        )
+      }
+
+      function renderCodex() {
+        if (!codexEl) return
+        codexEl.innerHTML = codexHtml(currentCopy())
+        codexEl.hidden = false
+        draftEl.hidden = true
+        overlay = 'codex'
+        var first =
+          codexEl.querySelector('.jcc-codex-card:not([disabled])') || codexEl.querySelector('.jcc-x')
+        if (first) first.focus({ preventScroll: true })
+      }
+
+      function openDraft() {
+        if (!draftEl) return
+        overlayTrigger = panel ? panel.querySelector('[data-jcc="draft"]') : null
+        renderDraft(false)
+      }
+
+      function openCodex() {
+        if (!codexEl) return
+        overlayTrigger = panel ? panel.querySelector('[data-jcc="codex"]') : null
+        renderCodex()
+      }
+
+      function closeOverlay(refocus) {
+        overlay = ''
+        clearArmed = false
+        if (clearTimer) {
+          window.clearTimeout(clearTimer)
+          clearTimer = 0
+        }
+        if (draftEl) draftEl.hidden = true
+        if (codexEl) codexEl.hidden = true
+        if (refocus) {
+          var target =
+            overlayTrigger && overlayTrigger.isConnected
+              ? overlayTrigger
+              : panel
+                ? panel.querySelector('[data-jcc="draft"]')
+                : orb
+          if (target) target.focus({ preventScroll: true })
+        }
+        overlayTrigger = null
+      }
+
+      function pickCard(id) {
+        var card = CARD_BY_ID[id]
+        if (!card) return
+        if (!isOwned(id)) state.collection = state.collection.concat([id])
+        setState({ on: true, accent: card.accent, texture: card.texture })
+        closeOverlay(true)
+      }
+
+      function handleClear() {
+        if (state.collection.length === 0) return
+        if (!clearArmed) {
+          clearArmed = true
+          renderCodex()
+          var armedClear = codexEl.querySelector('[data-jcc="clear"]')
+          if (armedClear) armedClear.focus({ preventScroll: true })
+          clearTimer = window.setTimeout(function () {
+            clearTimer = 0
+            clearArmed = false
+            if (overlay === 'codex') renderCodex()
+          }, 3200)
+          return
+        }
+        if (clearTimer) {
+          window.clearTimeout(clearTimer)
+          clearTimer = 0
+        }
+        clearArmed = false
+        state.collection = []
+        saveState()
+        syncUi()
+        renderCodex()
+      }
+
+      function overlayFocusables(root) {
+        var nodes = root.querySelectorAll(
+          'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+        )
+        var list = []
+        for (var i = 0; i < nodes.length; i += 1) {
+          if (nodes[i].offsetParent !== null) list.push(nodes[i])
+        }
+        return list
+      }
+
+      function trapOverlayFocus(event) {
+        var root = overlay === 'draft' ? draftEl : codexEl
+        if (!root) return
+        var list = overlayFocusables(root)
+        if (list.length === 0) return
+        var first = list[0]
+        var last = list[list.length - 1]
+        var active = document.activeElement
+        if (event.shiftKey) {
+          if (active === first || !root.contains(active)) {
+            event.preventDefault()
+            last.focus()
+          }
+        } else if (active === last || !root.contains(active)) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+
+      function onOverlayClick(event) {
+        var root = event.currentTarget
+        var node = event.target
+        var control = null
+        while (node && node !== root) {
+          if (node.dataset && (node.dataset.jcc || node.dataset.card)) {
+            control = node
+            break
+          }
+          node = node.parentElement
+        }
+        if (!control) return
+        if (control.dataset.jcc === 'dismiss') closeOverlay(true)
+        else if (control.dataset.jcc === 'redraw') renderDraft(false)
+        else if (control.dataset.jcc === 'codex') openCodex()
+        else if (control.dataset.jcc === 'draw') openDraft()
+        else if (control.dataset.jcc === 'pick') pickCard(control.dataset.card)
+        else if (control.dataset.jcc === 'codexPick') {
+          if (!control.disabled) pickCard(control.dataset.card)
+        } else if (control.dataset.jcc === 'clear') handleClear()
       }
 
       /* -------------------------------------------------------------------
@@ -842,6 +1245,22 @@
         if (ambience) {
           ambience.remove()
           ambience = null
+        }
+        if (clearTimer) {
+          window.clearTimeout(clearTimer)
+          clearTimer = 0
+        }
+        overlay = ''
+        overlayTrigger = null
+        clearArmed = false
+        draftCards = []
+        if (draftEl) {
+          draftEl.remove()
+          draftEl = null
+        }
+        if (codexEl) {
+          codexEl.remove()
+          codexEl = null
         }
         if (dock) {
           dock.remove()

@@ -20,18 +20,20 @@
 
 ;(function () {
   var PKG = 'dsh-jcc-theme'
-  var VERSION = "0.1.2"
+  var VERSION = "0.2.0"
   var STYLE_ID = 'dsh-jcc-theme-style'
   var DOCK_ID = 'dsh-jcc-dock'
   var PANEL_ID = 'dsh-jcc-panel'
   var AMBIENCE_ID = 'dsh-jcc-ambience'
+  var DRAFT_ID = 'dsh-jcc-draft'
+  var CODEX_ID = 'dsh-jcc-codex'
   var STORE_KEY = 'dsh-jcc/v1'
   var ACCENT_IDS = ['gold', 'cyan', 'violet', 'blue']
   var CORNERS = ['soft', 'sharp']
   var TEXTURES = ['subtle', 'normal', 'vivid']
 
   /* theme.css, inlined by build.mjs. */
-  var STATIC_CSS = "/*\n * dsh-jcc-theme — static stylesheet.\n *\n * The colour tokens (--dsw-alias-*) are generated in client.js from the same\n * palette table that feeds every accent, so this file holds only what does not\n * depend on a colour scheme by itself: the page canvas, the hex board, and the\n * floating hex-core panel.\n *\n * Conventions\n *   - every page-level rule is gated on :root[data-jcc=\"on\"], so switching the\n *     theme off restores the stock UI without unloading the bundle;\n *   - the launcher keeps its own dark HUD colours instead of reading page\n *     tokens, so it stays legible while the theme is off (that is when you\n *     need it to turn the theme back on).\n */\n\n/* ── 0. Own variables ───────────────────────────────────────────────────── */\n\n:root {\n  /* Overwritten per accent by the generated sheet; these are the fallbacks. */\n  --jcc-accent: #e8c477;\n  --jcc-accent-2: #f6e3b4;\n  --jcc-accent-deep: #a97f2e;\n\n  --jcc-grid: 44px;\n  --jcc-grid-p: 7%;\n  --jcc-grid-p2: 4.5%;\n\n  --jcc-hud-bg: #0a0f1b;\n  --jcc-hud-bg-2: #121a2b;\n  --jcc-hud-line: rgba(232, 196, 119, 0.26);\n  --jcc-hud-text: #f3ebd9;\n  --jcc-hud-text-2: #c3b79e;\n  --jcc-hud-text-3: #8d8370;\n  --jcc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);\n\n  --jcc-radius-panel: 16px;\n  --jcc-radius-control: 10px;\n  --jcc-radius-pill: 999px;\n  --jcc-panel-blur: 18px;\n}\n\n/* Sharp HUD corners: the panel and the product's own radii both tighten. */\n:root[data-jcc-corners=\"sharp\"] {\n  --jcc-radius-panel: 8px;\n  --jcc-radius-control: 4px;\n  --jcc-radius-pill: 4px;\n  --jcc-panel-blur: 8px;\n}\n\n:root[data-jcc=\"on\"][data-jcc-corners=\"sharp\"] body {\n  --dsw-radius-xs: 2px;\n  --dsw-radius-sm: 3px;\n  --dsw-radius-md: 4px;\n  --dsw-radius-lg: 6px;\n  --dsw-radius-xl: 8px;\n  --dsw-radius-panel: 10px;\n}\n\n:root[data-jcc=\"on\"][data-jcc-texture=\"subtle\"] {\n  --jcc-grid: 58px;\n  --jcc-grid-p: 4.5%;\n  --jcc-grid-p2: 3%;\n}\n\n:root[data-jcc=\"on\"][data-jcc-texture=\"normal\"] {\n  --jcc-grid: 44px;\n  --jcc-grid-p: 7%;\n  --jcc-grid-p2: 4.5%;\n}\n\n:root[data-jcc=\"on\"][data-jcc-texture=\"vivid\"] {\n  --jcc-grid: 32px;\n  --jcc-grid-p: 11%;\n  --jcc-grid-p2: 7%;\n}\n\n/* ── 1. The board: canvas, hex lattice, ambient hextech light ───────────── */\n\n/* The product paints the app frame (and each page root) with\n   `--dsw-alias-bg-base`, which covers the body canvas. client.js marks those\n   full-viewport canvas layers at runtime; only they go transparent, so sticky\n   headers and cards that also use the token keep their opaque fill. */\n:root[data-jcc=\"on\"] .jcc-canvas {\n  background-color: transparent !important;\n}\n\n:root[data-jcc=\"on\"] body {\n  background-attachment: fixed;\n  background-position: center;\n  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;\n  background-size: cover, auto, auto, auto, auto, auto;\n}\n\n:root[data-jcc=\"on\"] body:not([data-ds-dark-theme]) {\n  --jcc-deco: var(--jcc-accent-deep);\n  --jcc-scene: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201600%201000%22%20width%3D%221600%22%20height%3D%221000%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22paper%22%20cx%3D%22.5%22%20cy%3D%22.42%22%20r%3D%22.78%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fdf9f0%22%2F%3E%3Cstop%20offset%3D%22.58%22%20stop-color%3D%22%23f7efdd%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23eadfc6%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22sun%22%20cx%3D%22.62%22%20cy%3D%22.12%22%20r%3D%22.58%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff8e6%22%20stop-opacity%3D%22.95%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%22.32%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22core%22%20cx%3D%22.5%22%20cy%3D%22.5%22%20r%3D%22.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.32%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%23c99a2e%22%20stop-opacity%3D%22.1%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a8822f%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22gold%22%20x1%3D%22.1%22%20y1%3D%220%22%20x2%3D%22.9%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8c477%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23c99a2e%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238a6413%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22vignette%22%20cx%3D%22.5%22%20cy%3D%22.44%22%20r%3D%22.82%22%3E%3Cstop%20offset%3D%22.52%22%20stop-color%3D%22%238a6d3b%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238a6d3b%22%20stop-opacity%3D%22.22%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22floor%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f3e8cf%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%22.7%22%20stop-color%3D%22%23f3e8cf%22%20stop-opacity%3D%22.55%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f3e8cf%22%20stop-opacity%3D%22.92%22%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%22soft%22%20x%3D%22-50%25%22%20y%3D%22-50%25%22%20width%3D%22200%25%22%20height%3D%22200%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2220%22%2F%3E%3C%2Ffilter%3E%3Csymbol%20id%3D%22hex%22%20viewBox%3D%22-10%20-10%2020%2020%22%3E%3Cpath%20d%3D%22M0-10%208.66-5%208.66%205%200%2010-8.66%205-8.66-5Z%22%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-width%3D%22.9%22%2F%3E%3C%2Fsymbol%3E%3C%2Fdefs%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23paper)%22%2F%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23sun)%22%2F%3E%3C!--%20old%20chart%20contours%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-opacity%3D%22.08%22%3E%3Cpath%20d%3D%22M-120%20128C220%2072%20430%20196%20760%20148S1330%2066%201720%20138%22%2F%3E%3Cpath%20d%3D%22M-120%20188C240%20130%20450%20258%20780%20206S1350%20124%201720%20196%22%2F%3E%3Cpath%20d%3D%22M-120%20252C200%20198%20480%20314%20800%20262S1360%20184%201720%20256%22%2F%3E%3Cpath%20d%3D%22M-120%20322C260%20268%20500%20382%20820%20330S1380%20250%201720%20322%22%2F%3E%3Cpath%20d%3D%22M-120%20398C240%20344%20520%20456%20840%20404S1400%20324%201720%20396%22%2F%3E%3Cpath%20d%3D%22M-120%20480C280%20424%20540%20536%20860%20484S1420%20404%201720%20476%22%2F%3E%3Cpath%20d%3D%22M-120%20566C240%20512%20560%20620%20880%20568S1440%20488%201720%20560%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23a8822f%22%20opacity%3D%22.18%22%3E%3Ccircle%20cx%3D%22286%22%20cy%3D%22132%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22612%22%20cy%3D%22198%22%20r%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%22944%22%20cy%3D%22146%22%20r%3D%221.3%22%2F%3E%3Ccircle%20cx%3D%221268%22%20cy%3D%22210%22%20r%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%22372%22%20cy%3D%22338%22%20r%3D%221.2%22%2F%3E%3Ccircle%20cx%3D%221084%22%20cy%3D%22368%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22696%22%20cy%3D%22470%22%20r%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%221436%22%20cy%3D%22474%22%20r%3D%221.3%22%2F%3E%3Ccircle%20cx%3D%22182%22%20cy%3D%22566%22%20r%3D%221.2%22%2F%3E%3Ccircle%20cx%3D%221232%22%20cy%3D%22586%22%20r%3D%221.1%22%2F%3E%3C%2Fg%3E%3C!--%20arena%20floor%20--%3E%3Cellipse%20cx%3D%22800%22%20cy%3D%22596%22%20rx%3D%22600%22%20ry%3D%2248%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.5%22%2F%3E%3Cpath%20d%3D%22M-80%20610Q800%20552%201680%20610%22%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-opacity%3D%22.12%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-opacity%3D%22.07%22%3E%3Cpath%20d%3D%22M800%20590L-260%201000M800%20590L-40%201000M800%20590L180%201000M800%20590L400%201000M800%20590L620%201000M800%20590L800%201000M800%20590L980%201000M800%20590L1200%201000M800%20590L1420%201000M800%20590L1620%201000M800%20590L1860%201000%22%2F%3E%3Cpath%20d%3D%22M-140%20706Q800%20650%201740%20706%22%2F%3E%3Cpath%20d%3D%22M-140%20792Q800%20730%201740%20792%22%2F%3E%3Cpath%20d%3D%22M-140%20896Q800%20826%201740%20896%22%2F%3E%3Cpath%20d%3D%22M-140%201010Q800%20930%201740%201010%22%2F%3E%3C%2Fg%3E%3C!--%20arena%20rings%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M800%20306%201215.7%20546V1026L800%201266%20384.3%201026V546Z%22%20stroke-opacity%3D%22.1%22%20stroke-width%3D%221.1%22%2F%3E%3Cpath%20d%3D%22M800%20486%201059.8%20636v300L800%201086%20540.2%20936V636Z%22%20stroke-opacity%3D%22.16%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M800%20626%20940%20706v160L800%20946%20660%20866V706Z%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22800%22%20cy%3D%22786%22%20r%3D%22466%22%20stroke-dasharray%3D%222%2018%22%20stroke-opacity%3D%22.12%22%2F%3E%3C%2Fg%3E%3C!--%20golden%20spatula%20watermark%20--%3E%3Cellipse%20cx%3D%221470%22%20cy%3D%22306%22%20rx%3D%22250%22%20ry%3D%22230%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.45%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cpath%20d%3D%22M1470%20126%201625.9%20216V396L1470%20486%201314.1%20396V216Z%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-opacity%3D%22.12%22%20stroke-width%3D%221.2%22%2F%3E%3Cg%20transform%3D%22translate(1470%20306)%20rotate(-12)%20scale(11)%20translate(-12%20-12)%22%20opacity%3D%22.18%22%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%2213%22%20rx%3D%2220%22%20ry%3D%2216%22%20fill%3D%22url(%23core)%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cg%20fill%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M14.4%203.2c1.9-.6%203.9-.3%205.5%201.1%201.4%201.6%201.7%203.6%201.1%205.5-.2.8-.7%201.5-1.3%202.1l-1.1%201.1-7.4-7.4%201.1-1.1c.6-.6%201.3-1.1%202.1-1.3Z%22%2F%3E%3Cpath%20d%3D%22M11.7%208.2%204.2%2015.7%22%20stroke%3D%22url(%23gold)%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C!--%20compass%20rose%20--%3E%3Cg%20transform%3D%22translate(212%20812)%22%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20opacity%3D%22.16%22%3E%3Ccircle%20r%3D%2286%22%20stroke-opacity%3D%22.5%22%2F%3E%3Ccircle%20r%3D%2258%22%20stroke-dasharray%3D%221%209%22%2F%3E%3Cpath%20d%3D%22M0-86V86M-86%200H86M-61-61%2061%2061M61-61-61%2061%22%20stroke-opacity%3D%22.35%22%2F%3E%3Cpath%20d%3D%22M0-22%208%200%200%2022-8%200Z%22%20fill%3D%22%23a8822f%22%20stroke%3D%22none%22%20opacity%3D%22.7%22%2F%3E%3C%2Fg%3E%3C!--%20floating%20hexes%20--%3E%3Cg%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22262%22%20y%3D%22220%22%20width%3D%2230%22%20height%3D%2230%22%20opacity%3D%22.2%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221216%22%20y%3D%22470%22%20width%3D%2220%22%20height%3D%2220%22%20opacity%3D%22.16%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22442%22%20y%3D%22592%22%20width%3D%2226%22%20height%3D%2226%22%20opacity%3D%22.16%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221438%22%20y%3D%22752%22%20width%3D%2224%22%20height%3D%2224%22%20opacity%3D%22.14%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221046%22%20y%3D%22154%22%20width%3D%2216%22%20height%3D%2216%22%20opacity%3D%22.18%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22590%22%20y%3D%22252%22%20width%3D%2218%22%20height%3D%2218%22%20opacity%3D%22.15%22%2F%3E%3Ccircle%20cx%3D%22279%22%20cy%3D%22235%22%20r%3D%222%22%20fill%3D%22%23a8822f%22%20opacity%3D%22.26%22%2F%3E%3C%2Fg%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23vignette)%22%2F%3E%3Crect%20y%3D%22560%22%20width%3D%221600%22%20height%3D%22440%22%20fill%3D%22url(%23floor)%22%2F%3E%3C%2Fsvg%3E\");\n  background-color: #f7f1e3;\n  background-image:\n    var(--jcc-scene, none),\n    radial-gradient(\n      1100px 560px at 50% -220px,\n      color-mix(in srgb, var(--jcc-accent) 16%, transparent),\n      transparent 70%\n    ),\n    radial-gradient(\n      900px 500px at 104% 108%,\n      color-mix(in srgb, var(--jcc-accent-2) 10%, transparent),\n      transparent 72%\n    ),\n    repeating-linear-gradient(\n      60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      -60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      0deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p2), transparent) 0 1px,\n      transparent 1px calc(var(--jcc-grid) * 0.86)\n    );\n}\n\n:root[data-jcc=\"on\"] body[data-ds-dark-theme] {\n  --jcc-deco: var(--jcc-accent);\n  --jcc-scene: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201600%201000%22%20width%3D%221600%22%20height%3D%221000%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22sky%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2304060c%22%2F%3E%3Cstop%20offset%3D%22.42%22%20stop-color%3D%22%23070c17%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230b1424%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22dawn%22%20cx%3D%22.62%22%20cy%3D%22.2%22%20r%3D%22.6%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.26%22%2F%3E%3Cstop%20offset%3D%22.42%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.09%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22core%22%20cx%3D%22.5%22%20cy%3D%22.5%22%20r%3D%22.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.14%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22gold%22%20x1%3D%22.1%22%20y1%3D%220%22%20x2%3D%22.9%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fbf0d2%22%2F%3E%3Cstop%20offset%3D%22.42%22%20stop-color%3D%22%23e8c477%22%2F%3E%3Cstop%20offset%3D%22.78%22%20stop-color%3D%22%23c99a2e%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238a6413%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22handle%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f6e3b4%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a97f2e%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22vignette%22%20cx%3D%22.5%22%20cy%3D%22.44%22%20r%3D%22.8%22%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23000%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23000%22%20stop-opacity%3D%22.66%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22floor%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2304060c%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%22.62%22%20stop-color%3D%22%2304060c%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2304060c%22%20stop-opacity%3D%22.92%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22crystal%22%20cx%3D%22.5%22%20cy%3D%22.35%22%20r%3D%22.7%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%22.8%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3Cfilter%20id%3D%22soft%22%20x%3D%22-50%25%22%20y%3D%22-50%25%22%20width%3D%22200%25%22%20height%3D%22200%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2222%22%2F%3E%3C%2Ffilter%3E%3Cfilter%20id%3D%22bloom%22%20x%3D%22-50%25%22%20y%3D%22-50%25%22%20width%3D%22200%25%22%20height%3D%22200%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%227%22%2F%3E%3C%2Ffilter%3E%3Csymbol%20id%3D%22hex%22%20viewBox%3D%22-10%20-10%2020%2020%22%3E%3Cpath%20d%3D%22M0-10%208.66-5%208.66%205%200%2010-8.66%205-8.66-5Z%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-width%3D%22.9%22%2F%3E%3C%2Fsymbol%3E%3C%2Fdefs%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23sky)%22%2F%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23dawn)%22%2F%3E%3C!--%20arcane%20dust%20--%3E%3Cg%20fill%3D%22%23f6e3b4%22%3E%3Ccircle%20cx%3D%2286%22%20cy%3D%2292%22%20r%3D%221.1%22%20opacity%3D%22.42%22%2F%3E%3Ccircle%20cx%3D%22148%22%20cy%3D%22178%22%20r%3D%22.8%22%20opacity%3D%22.26%22%2F%3E%3Ccircle%20cx%3D%22232%22%20cy%3D%2264%22%20r%3D%221.4%22%20opacity%3D%22.5%22%2F%3E%3Ccircle%20cx%3D%22318%22%20cy%3D%22150%22%20r%3D%22.9%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%22410%22%20cy%3D%2286%22%20r%3D%221.1%22%20opacity%3D%22.34%22%2F%3E%3Ccircle%20cx%3D%22506%22%20cy%3D%22190%22%20r%3D%22.8%22%20opacity%3D%22.22%22%2F%3E%3Ccircle%20cx%3D%22596%22%20cy%3D%2272%22%20r%3D%221.3%22%20opacity%3D%22.42%22%2F%3E%3Ccircle%20cx%3D%22690%22%20cy%3D%22152%22%20r%3D%22.9%22%20opacity%3D%22.28%22%2F%3E%3Ccircle%20cx%3D%22792%22%20cy%3D%2258%22%20r%3D%221.2%22%20opacity%3D%22.46%22%2F%3E%3Ccircle%20cx%3D%22892%22%20cy%3D%22128%22%20r%3D%22.8%22%20opacity%3D%22.24%22%2F%3E%3Ccircle%20cx%3D%22990%22%20cy%3D%2274%22%20r%3D%221.4%22%20opacity%3D%22.4%22%2F%3E%3Ccircle%20cx%3D%221092%22%20cy%3D%22182%22%20r%3D%22.9%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%221194%22%20cy%3D%2292%22%20r%3D%221.1%22%20opacity%3D%22.44%22%2F%3E%3Ccircle%20cx%3D%221290%22%20cy%3D%22156%22%20r%3D%22.8%22%20opacity%3D%22.22%22%2F%3E%3Ccircle%20cx%3D%221392%22%20cy%3D%2266%22%20r%3D%221.3%22%20opacity%3D%22.4%22%2F%3E%3Ccircle%20cx%3D%221496%22%20cy%3D%22148%22%20r%3D%22.9%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%22336%22%20r%3D%22.8%22%20opacity%3D%22.2%22%2F%3E%3Ccircle%20cx%3D%22171%22%20cy%3D%22286%22%20r%3D%221.1%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%22286%22%20cy%3D%22360%22%20r%3D%22.8%22%20opacity%3D%22.18%22%2F%3E%3Ccircle%20cx%3D%22382%22%20cy%3D%22272%22%20r%3D%221.2%22%20opacity%3D%22.32%22%2F%3E%3Ccircle%20cx%3D%221230%22%20cy%3D%22300%22%20r%3D%221%22%20opacity%3D%22.26%22%2F%3E%3Ccircle%20cx%3D%221338%22%20cy%3D%22360%22%20r%3D%22.8%22%20opacity%3D%22.2%22%2F%3E%3Ccircle%20cx%3D%221446%22%20cy%3D%22286%22%20r%3D%221.2%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%221536%22%20cy%3D%22380%22%20r%3D%22.8%22%20opacity%3D%22.18%22%2F%3E%3C%2Fg%3E%3C!--%20horizon%20--%3E%3Cellipse%20cx%3D%22800%22%20cy%3D%22588%22%20rx%3D%22620%22%20ry%3D%2254%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.4%22%2F%3E%3Cpath%20d%3D%22M-80%20604Q800%20532%201680%20604%22%20fill%3D%22none%22%20stroke%3D%22%23e8c477%22%20stroke-opacity%3D%22.14%22%2F%3E%3Cpath%20d%3D%22M-80%20604Q800%20546%201680%20604%22%20fill%3D%22none%22%20stroke%3D%22%23f6e3b4%22%20stroke-opacity%3D%22.06%22%2F%3E%3C!--%20receding%20arena%20floor%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e8c477%22%20stroke-opacity%3D%22.09%22%3E%3Cpath%20d%3D%22M800%20566L-260%201000M800%20566L-40%201000M800%20566L180%201000M800%20566L400%201000M800%20566L620%201000M800%20566L800%201000M800%20566L980%201000M800%20566L1200%201000M800%20566L1420%201000M800%20566L1620%201000M800%20566L1860%201000%22%2F%3E%3Cpath%20d%3D%22M-140%20690Q800%20628%201740%20690%22%20stroke-opacity%3D%22.07%22%2F%3E%3Cpath%20d%3D%22M-140%20772Q800%20706%201740%20772%22%20stroke-opacity%3D%22.08%22%2F%3E%3Cpath%20d%3D%22M-140%20872Q800%20798%201740%20872%22%20stroke-opacity%3D%22.09%22%2F%3E%3Cpath%20d%3D%22M-140%20990Q800%20900%201740%20990%22%20stroke-opacity%3D%22.1%22%2F%3E%3C%2Fg%3E%3C!--%20hex%20arena%3A%20three%20tiers%20%2B%20rune%20ticks%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M800%20280%201215.7%20520V1000L800%201240%20384.3%201000V520Z%22%20stroke-opacity%3D%22.14%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M800%20460%201059.8%20610v300L800%201060%20540.2%20910V610Z%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.4%22%2F%3E%3Cpath%20d%3D%22M800%20610%20940%20690v160L800%20930%20660%20850V690Z%22%20stroke-opacity%3D%22.3%22%20stroke-width%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%22800%22%20cy%3D%22770%22%20r%3D%22472%22%20stroke-dasharray%3D%222%2018%22%20stroke-opacity%3D%22.16%22%2F%3E%3C%2Fg%3E%3C!--%20platform%20glow%20--%3E%3Cellipse%20cx%3D%22800%22%20cy%3D%22792%22%20rx%3D%22230%22%20ry%3D%2270%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.55%22%20filter%3D%22url(%23bloom)%22%2F%3E%3C!--%20the%20golden%20spatula%2C%20an%20original%20geometric%20mark%20--%3E%3Cellipse%20cx%3D%221470%22%20cy%3D%22300%22%20rx%3D%22260%22%20ry%3D%22240%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.42%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cpath%20d%3D%22M1470%20120%201625.9%20210V390L1470%20480%201314.1%20390V210Z%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-opacity%3D%22.14%22%20stroke-width%3D%221.2%22%2F%3E%3Cg%20transform%3D%22translate(1470%20300)%20rotate(-12)%20scale(11.5)%20translate(-12%20-12)%22%20opacity%3D%22.26%22%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%2213%22%20rx%3D%2222%22%20ry%3D%2218%22%20fill%3D%22url(%23crystal)%22%20opacity%3D%22.5%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cg%20fill%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M14.4%203.2c1.9-.6%203.9-.3%205.5%201.1%201.4%201.6%201.7%203.6%201.1%205.5-.2.8-.7%201.5-1.3%202.1l-1.1%201.1-7.4-7.4%201.1-1.1c.6-.6%201.3-1.1%202.1-1.3Z%22%2F%3E%3Cpath%20d%3D%22M11.7%208.2%204.2%2015.7%22%20stroke%3D%22url(%23handle)%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C!--%20floating%20hex%20crystals%20--%3E%3Cg%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22214%22%20y%3D%22196%22%20width%3D%2234%22%20height%3D%2234%22%20opacity%3D%22.36%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221228%22%20y%3D%22452%22%20width%3D%2222%22%20height%3D%2222%22%20opacity%3D%22.24%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22408%22%20y%3D%22548%22%20width%3D%2230%22%20height%3D%2230%22%20opacity%3D%22.26%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221464%22%20y%3D%22742%22%20width%3D%2226%22%20height%3D%2226%22%20opacity%3D%22.2%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22118%22%20y%3D%22764%22%20width%3D%2220%22%20height%3D%2220%22%20opacity%3D%22.18%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221058%22%20y%3D%22140%22%20width%3D%2216%22%20height%3D%2216%22%20opacity%3D%22.28%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22596%22%20y%3D%22228%22%20width%3D%2218%22%20height%3D%2218%22%20opacity%3D%22.22%22%2F%3E%3Ccircle%20cx%3D%22231%22%20cy%3D%22212%22%20r%3D%222%22%20fill%3D%22%23f6e3b4%22%20opacity%3D%22.4%22%2F%3E%3Ccircle%20cx%3D%221238%22%20cy%3D%22463%22%20r%3D%221.6%22%20fill%3D%22%23f6e3b4%22%20opacity%3D%22.34%22%2F%3E%3Ccircle%20cx%3D%22421%22%20cy%3D%22563%22%20r%3D%222%22%20fill%3D%22%23f6e3b4%22%20opacity%3D%22.3%22%2F%3E%3C%2Fg%3E%3C!--%20frame%20light%20--%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23vignette)%22%2F%3E%3Crect%20y%3D%22560%22%20width%3D%221600%22%20height%3D%22440%22%20fill%3D%22url(%23floor)%22%2F%3E%3C%2Fsvg%3E\");\n  background-color: #080b14;\n  background-image:\n    var(--jcc-scene, none),\n    radial-gradient(\n      1200px 620px at 50% -240px,\n      color-mix(in srgb, var(--jcc-accent) 15%, transparent),\n      transparent 70%\n    ),\n    radial-gradient(\n      1000px 560px at 106% 110%,\n      color-mix(in srgb, var(--jcc-accent) 9%, transparent),\n      transparent 72%\n    ),\n    repeating-linear-gradient(\n      60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      -60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      0deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p2), transparent) 0 1px,\n      transparent 1px calc(var(--jcc-grid) * 0.86)\n    );\n}\n\n/* A thin arcane seam along the top edge of the viewport. */\n:root[data-jcc=\"on\"] body::before {\n  content: \"\";\n  position: fixed;\n  inset: 0 0 auto 0;\n  height: 1px;\n  z-index: 2147482000;\n  pointer-events: none;\n  background: linear-gradient(\n    90deg,\n    transparent,\n    color-mix(in srgb, var(--jcc-accent) 78%, transparent) 22%,\n    color-mix(in srgb, var(--jcc-accent-2) 90%, transparent) 50%,\n    color-mix(in srgb, var(--jcc-accent) 78%, transparent) 78%,\n    transparent\n  );\n  opacity: 0.7;\n}\n\n:root[data-jcc=\"on\"] ::selection {\n  background: color-mix(in srgb, var(--jcc-accent) 38%, transparent);\n}\n\n:root[data-jcc=\"on\"] a[href]:hover {\n  text-shadow: 0 0 10px color-mix(in srgb, var(--jcc-accent) 55%, transparent);\n}\n\n/* ── 2. Ambience: dust and a slow aurora behind the app ──────────────────── */\n\n.jcc-ambience {\n  position: fixed;\n  inset: 0;\n  z-index: -1;\n  display: none;\n  overflow: hidden;\n  pointer-events: none;\n}\n\n:root[data-jcc=\"on\"][data-jcc-ambience=\"on\"] .jcc-ambience {\n  display: block;\n}\n\n.jcc-ambience::before,\n.jcc-ambience::after {\n  content: \"\";\n  position: absolute;\n  inset: -30%;\n  background-image:\n    radial-gradient(circle at 12% 24%, color-mix(in srgb, var(--jcc-deco) 62%, transparent) 0 1.3px, transparent 1.9px),\n    radial-gradient(circle at 68% 12%, color-mix(in srgb, var(--jcc-deco) 48%, transparent) 0 1px, transparent 1.6px),\n    radial-gradient(circle at 38% 66%, color-mix(in srgb, var(--jcc-deco) 56%, transparent) 0 1.5px, transparent 2.1px),\n    radial-gradient(circle at 86% 54%, color-mix(in srgb, var(--jcc-deco) 40%, transparent) 0 1px, transparent 1.5px),\n    radial-gradient(circle at 58% 88%, color-mix(in srgb, var(--jcc-deco) 52%, transparent) 0 1.2px, transparent 1.8px),\n    radial-gradient(circle at 8% 76%, color-mix(in srgb, var(--jcc-deco) 38%, transparent) 0 0.9px, transparent 1.4px);\n  background-size: 460px 460px, 610px 610px, 380px 380px, 720px 720px, 520px 520px, 840px 840px;\n  animation: jcc-drift 180s linear infinite;\n  opacity: 0.5;\n}\n\n.jcc-ambience::after {\n  animation-direction: reverse;\n  animation-duration: 260s;\n  opacity: 0.26;\n}\n\n.jcc-aurora {\n  position: absolute;\n  top: -30%;\n  left: 50%;\n  width: 120vmax;\n  height: 90vmax;\n  transform: translateX(-50%);\n  background: radial-gradient(\n    ellipse at center,\n    color-mix(in srgb, var(--jcc-accent) 13%, transparent),\n    transparent 66%\n  );\n  opacity: 0.45;\n  animation: jcc-breathe 22s ease-in-out infinite alternate;\n}\n\n/* ── 3. Launcher: the hex core in the bottom-right corner ────────────────── */\n\n.jcc-dock {\n  position: fixed;\n  right: 18px;\n  bottom: 18px;\n  z-index: 2147483000;\n  width: 46px;\n  height: 52px;\n  pointer-events: none;\n}\n\n.jcc-dock *,\n.jcc-panel *,\n.jcc-panel {\n  box-sizing: border-box;\n}\n\n.jcc-halo {\n  position: absolute;\n  inset: -9px;\n  border-radius: 50%;\n  background: conic-gradient(\n    from 0deg,\n    transparent 0 66%,\n    color-mix(in srgb, var(--jcc-accent) 85%, transparent) 84%,\n    transparent 100%\n  );\n  filter: blur(9px);\n  opacity: 0.55;\n  animation: jcc-orbit 9s linear infinite;\n  pointer-events: none;\n}\n\n.jcc-orb {\n  position: relative;\n  display: grid;\n  place-items: center;\n  width: 46px;\n  height: 52px;\n  padding: 0;\n  border: 0;\n  cursor: pointer;\n  pointer-events: auto;\n  color: var(--jcc-accent-2);\n  background: linear-gradient(\n    165deg,\n    var(--jcc-accent-2),\n    var(--jcc-accent) 48%,\n    var(--jcc-accent-deep)\n  );\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.4));\n  transition: transform 0.18s var(--jcc-ease), filter 0.18s var(--jcc-ease);\n}\n\n.jcc-orb::before {\n  content: \"\";\n  position: absolute;\n  inset: 2px;\n  clip-path: inherit;\n  background:\n    radial-gradient(circle at 50% 26%, #243352, #0a0f1b 74%),\n    repeating-linear-gradient(\n      60deg,\n      rgba(255, 255, 255, 0.05) 0 1px,\n      transparent 1px 9px\n    );\n}\n\n.jcc-orb svg {\n  position: relative;\n  z-index: 1;\n  width: 22px;\n  height: 22px;\n  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--jcc-accent) 65%, transparent));\n}\n\n.jcc-orb:hover {\n  transform: translateY(-1px) scale(1.04);\n  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45))\n    drop-shadow(0 0 14px color-mix(in srgb, var(--jcc-accent) 45%, transparent));\n}\n\n.jcc-orb:active {\n  transform: scale(0.97);\n}\n\n.jcc-orb:focus-visible {\n  outline: none;\n  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--jcc-accent) 85%, transparent));\n}\n\n.jcc-orb:focus-visible::before {\n  inset: 4px;\n  box-shadow: inset 0 0 0 2px var(--jcc-accent-2);\n}\n\n.jcc-dock:has(.jcc-orb:focus-visible)::after {\n  content: \"\";\n  position: absolute;\n  inset: -5px;\n  border: 2px solid var(--jcc-accent-2);\n  border-radius: 16px;\n  opacity: 0.9;\n  pointer-events: none;\n}\n\n.jcc-orb.is-open {\n  transform: scale(0.96);\n}\n\n:root[data-jcc=\"off\"] .jcc-halo {\n  opacity: 0.12;\n  animation: none;\n}\n\n:root[data-jcc=\"off\"] .jcc-orb {\n  filter: grayscale(0.55) brightness(0.86) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));\n}\n\n/* ── 4. Panel: the hex-core HUD ─────────────────────────────────────────── */\n\n.jcc-panel {\n  position: fixed;\n  right: 18px;\n  bottom: 82px;\n  z-index: 2147483001;\n  width: 278px;\n  max-height: calc(100vh - 160px);\n  overflow: auto;\n  padding: 14px 14px 12px;\n  color: var(--jcc-hud-text);\n  background:\n    radial-gradient(\n      220px 140px at 100% 0,\n      color-mix(in srgb, var(--jcc-accent) 12%, transparent),\n      transparent 70%\n    ),\n    linear-gradient(180deg, #131c2e, var(--jcc-hud-bg) 72%);\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 42%, transparent);\n  border-radius: var(--jcc-radius-panel);\n  box-shadow:\n    0 26px 70px rgba(0, 0, 0, 0.55),\n    0 0 0 1px rgba(0, 0, 0, 0.35),\n    0 0 40px -14px color-mix(in srgb, var(--jcc-accent) 60%, transparent);\n  font: 400 13px/1.45 var(--dsw-font-family, system-ui, sans-serif);\n  -webkit-backdrop-filter: blur(var(--jcc-panel-blur)) saturate(1.1);\n  backdrop-filter: blur(var(--jcc-panel-blur)) saturate(1.1);\n  animation: jcc-pop 0.18s var(--jcc-ease);\n}\n\n.jcc-panel[hidden] {\n  display: none;\n}\n\n.jcc-panel::before {\n  content: \"\";\n  position: absolute;\n  top: 0;\n  left: 18px;\n  right: 18px;\n  height: 1px;\n  background: linear-gradient(\n    90deg,\n    transparent,\n    color-mix(in srgb, var(--jcc-accent) 80%, transparent),\n    transparent\n  );\n}\n\n.jcc-panel button:focus-visible {\n  outline: 2px solid var(--jcc-accent-2);\n  outline-offset: 2px;\n}\n\n.jcc-panel__top {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  padding-bottom: 11px;\n  border-bottom: 1px solid var(--jcc-hud-line);\n}\n\n.jcc-brand {\n  display: flex;\n  align-items: center;\n  gap: 9px;\n  min-width: 0;\n}\n\n.jcc-mark {\n  display: grid;\n  place-items: center;\n  flex: none;\n  width: 30px;\n  height: 34px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: linear-gradient(160deg, var(--jcc-accent-2), var(--jcc-accent-deep));\n  color: #10131c;\n}\n\n.jcc-mark svg {\n  width: 15px;\n  height: 15px;\n}\n\n.jcc-brand b {\n  display: block;\n  font-size: 13.5px;\n  font-weight: 600;\n  letter-spacing: 0.06em;\n  line-height: 1.25;\n}\n\n.jcc-brand small {\n  display: block;\n  margin-top: 2px;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  letter-spacing: 0.04em;\n  white-space: nowrap;\n}\n\n.jcc-x {\n  display: grid;\n  place-items: center;\n  flex: none;\n  width: 26px;\n  height: 26px;\n  padding: 0;\n  border: 0;\n  border-radius: calc(var(--jcc-radius-control) - 2px);\n  color: var(--jcc-hud-text-3);\n  background: transparent;\n  cursor: pointer;\n}\n\n.jcc-x:hover {\n  color: var(--jcc-hud-text);\n  background: rgba(255, 255, 255, 0.07);\n}\n\n.jcc-row {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  padding: 11px 0;\n}\n\n.jcc-field {\n  display: flex;\n  flex-direction: column;\n  gap: 9px;\n  padding: 11px 0;\n}\n\n.jcc-row + .jcc-field,\n.jcc-field + .jcc-field,\n.jcc-field + .jcc-row {\n  border-top: 1px solid rgba(255, 255, 255, 0.06);\n}\n\n.jcc-label {\n  color: var(--jcc-hud-text-2);\n  font-size: 12.5px;\n  letter-spacing: 0.02em;\n}\n\n.jcc-label em {\n  margin-left: 5px;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  font-style: normal;\n}\n\n/* switch */\n.jcc-switch {\n  position: relative;\n  flex: none;\n  width: 40px;\n  height: 22px;\n  padding: 0;\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 40%, transparent);\n  border-radius: var(--jcc-radius-pill);\n  background: rgba(255, 255, 255, 0.08);\n  cursor: pointer;\n  transition: background 0.18s, border-color 0.18s;\n}\n\n.jcc-switch > span {\n  position: absolute;\n  top: 2px;\n  left: 2px;\n  width: 16px;\n  height: 16px;\n  border-radius: 50%;\n  background: var(--jcc-hud-text-3);\n  transition: transform 0.18s var(--jcc-ease), background 0.18s;\n}\n\n.jcc-switch[aria-checked=\"true\"] {\n  border-color: transparent;\n  background: linear-gradient(90deg, var(--jcc-accent-deep), var(--jcc-accent));\n}\n\n.jcc-switch[aria-checked=\"true\"] > span {\n  transform: translateX(18px);\n  background: #12100a;\n}\n\n/* accent swatches */\n.jcc-swatches {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 6px;\n}\n\n.jcc-swatch {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 5px;\n  padding: 7px 2px 6px;\n  border: 1px solid rgba(255, 255, 255, 0.1);\n  border-radius: var(--jcc-radius-control);\n  color: var(--jcc-hud-text-3);\n  background: transparent;\n  font: inherit;\n  font-size: 10px;\n  letter-spacing: 0.02em;\n  cursor: pointer;\n  transition: border-color 0.15s, background 0.15s, color 0.15s;\n}\n\n.jcc-swatch:hover {\n  background: rgba(255, 255, 255, 0.05);\n}\n\n.jcc-swatch[aria-pressed=\"true\"] {\n  color: var(--jcc-hud-text);\n  border-color: color-mix(in srgb, var(--jcc-accent) 60%, transparent);\n  background: color-mix(in srgb, var(--jcc-accent) 10%, transparent);\n}\n\n.jcc-hex {\n  width: 22px;\n  height: 25px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: linear-gradient(160deg, #f6e3b4, #c99a2e 60%, #8a6413);\n  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);\n}\n\n.jcc-swatch[data-accent=\"cyan\"] .jcc-hex {\n  background: linear-gradient(160deg, #a8fff3, #2ec4b6 60%, #0b6b63);\n}\n\n.jcc-swatch[data-accent=\"violet\"] .jcc-hex {\n  background: linear-gradient(160deg, #e2d6ff, #9b7bea 60%, #5b3bbd);\n}\n\n.jcc-swatch[data-accent=\"blue\"] .jcc-hex {\n  background: linear-gradient(160deg, #d6e9ff, #4f93f0 60%, #1f5aa6);\n}\n\n/* texture segmented control */\n.jcc-seg {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 2px;\n  padding: 2px;\n  border: 1px solid rgba(255, 255, 255, 0.09);\n  border-radius: calc(var(--jcc-radius-control) - 1px);\n  background: rgba(255, 255, 255, 0.04);\n}\n\n.jcc-seg--two {\n  grid-template-columns: repeat(2, 1fr);\n}\n\n.jcc-seg button {\n  padding: 5px 0;\n  border: 0;\n  border-radius: calc(var(--jcc-radius-control) - 3px);\n  color: var(--jcc-hud-text-3);\n  background: transparent;\n  font: inherit;\n  font-size: 11.5px;\n  cursor: pointer;\n}\n\n.jcc-seg button[aria-pressed=\"true\"] {\n  color: var(--jcc-hud-text);\n  background: rgba(255, 255, 255, 0.09);\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);\n}\n\n.jcc-panel__foot {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  margin-top: 2px;\n  padding-top: 10px;\n  border-top: 1px solid var(--jcc-hud-line);\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  letter-spacing: 0.02em;\n}\n\n.jcc-reset {\n  padding: 2px 4px;\n  border: 0;\n  border-radius: calc(var(--jcc-radius-control) - 4px);\n  color: var(--jcc-accent-2);\n  background: transparent;\n  font: inherit;\n  font-size: 11px;\n  cursor: pointer;\n}\n\n.jcc-reset:hover {\n  background: rgba(255, 255, 255, 0.06);\n}\n\n/* ── 5. Motion ──────────────────────────────────────────────────────────── */\n\n@keyframes jcc-orbit {\n  to {\n    transform: rotate(360deg);\n  }\n}\n\n@keyframes jcc-pop {\n  from {\n    opacity: 0;\n    transform: translateY(6px) scale(0.985);\n  }\n}\n\n@keyframes jcc-drift {\n  from {\n    transform: translate3d(0, 0, 0);\n  }\n  to {\n    transform: translate3d(-140px, -180px, 0);\n  }\n}\n\n@keyframes jcc-breathe {\n  from {\n    opacity: 0.3;\n    transform: translateX(-50%) scale(1);\n  }\n  to {\n    opacity: 0.55;\n    transform: translateX(-50%) scale(1.06);\n  }\n}\n\n/* ── 6. Small screens ───────────────────────────────────────────────────── */\n\n@media (max-width: 860px) {\n  .jcc-dock {\n    right: 12px;\n    bottom: 92px;\n    transform: scale(0.94);\n    transform-origin: bottom right;\n  }\n\n  .jcc-panel {\n    right: 12px;\n    bottom: 152px;\n    width: min(278px, calc(100vw - 24px));\n    max-height: calc(100vh - 240px);\n  }\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .jcc-halo {\n    animation: none;\n  }\n\n  .jcc-ambience::before,\n  .jcc-ambience::after,\n  .jcc-aurora {\n    animation: none;\n  }\n\n  .jcc-panel {\n    animation: none;\n  }\n\n  .jcc-orb,\n  .jcc-switch,\n  .jcc-switch > span,\n  .jcc-swatch {\n    transition: none;\n  }\n}\n"
+  var STATIC_CSS = "/*\n * dsh-jcc-theme — static stylesheet.\n *\n * The colour tokens (--dsw-alias-*) are generated in client.js from the same\n * palette table that feeds every accent, so this file holds only what does not\n * depend on a colour scheme by itself: the page canvas, the hex board, and the\n * floating hex-core panel.\n *\n * Conventions\n *   - every page-level rule is gated on :root[data-jcc=\"on\"], so switching the\n *     theme off restores the stock UI without unloading the bundle;\n *   - the launcher keeps its own dark HUD colours instead of reading page\n *     tokens, so it stays legible while the theme is off (that is when you\n *     need it to turn the theme back on).\n */\n\n/* ── 0. Own variables ───────────────────────────────────────────────────── */\n\n:root {\n  /* Overwritten per accent by the generated sheet; these are the fallbacks. */\n  --jcc-accent: #e8c477;\n  --jcc-accent-2: #f6e3b4;\n  --jcc-accent-deep: #a97f2e;\n\n  --jcc-grid: 44px;\n  --jcc-grid-p: 7%;\n  --jcc-grid-p2: 4.5%;\n\n  --jcc-hud-bg: #0a0f1b;\n  --jcc-hud-bg-2: #121a2b;\n  --jcc-hud-line: rgba(232, 196, 119, 0.26);\n  --jcc-hud-text: #f3ebd9;\n  --jcc-hud-text-2: #c3b79e;\n  --jcc-hud-text-3: #8d8370;\n  --jcc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);\n\n  --jcc-radius-panel: 16px;\n  --jcc-radius-control: 10px;\n  --jcc-radius-pill: 999px;\n  --jcc-panel-blur: 18px;\n}\n\n/* Sharp HUD corners: the panel and the product's own radii both tighten. */\n:root[data-jcc-corners=\"sharp\"] {\n  --jcc-radius-panel: 8px;\n  --jcc-radius-control: 4px;\n  --jcc-radius-pill: 4px;\n  --jcc-panel-blur: 8px;\n}\n\n:root[data-jcc=\"on\"][data-jcc-corners=\"sharp\"] body {\n  --dsw-radius-xs: 2px;\n  --dsw-radius-sm: 3px;\n  --dsw-radius-md: 4px;\n  --dsw-radius-lg: 6px;\n  --dsw-radius-xl: 8px;\n  --dsw-radius-panel: 10px;\n}\n\n:root[data-jcc=\"on\"][data-jcc-texture=\"subtle\"] {\n  --jcc-grid: 58px;\n  --jcc-grid-p: 4.5%;\n  --jcc-grid-p2: 3%;\n}\n\n:root[data-jcc=\"on\"][data-jcc-texture=\"normal\"] {\n  --jcc-grid: 44px;\n  --jcc-grid-p: 7%;\n  --jcc-grid-p2: 4.5%;\n}\n\n:root[data-jcc=\"on\"][data-jcc-texture=\"vivid\"] {\n  --jcc-grid: 32px;\n  --jcc-grid-p: 11%;\n  --jcc-grid-p2: 7%;\n}\n\n/* ── 1. The board: canvas, hex lattice, ambient hextech light ───────────── */\n\n/* The product paints the app frame (and each page root) with\n   `--dsw-alias-bg-base`, which covers the body canvas. client.js marks those\n   full-viewport canvas layers at runtime; only they go transparent, so sticky\n   headers and cards that also use the token keep their opaque fill. */\n:root[data-jcc=\"on\"] .jcc-canvas {\n  background-color: transparent !important;\n}\n\n:root[data-jcc=\"on\"] body {\n  background-attachment: fixed;\n  background-position: center;\n  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;\n  background-size: cover, auto, auto, auto, auto, auto;\n}\n\n:root[data-jcc=\"on\"] body:not([data-ds-dark-theme]) {\n  --jcc-deco: var(--jcc-accent-deep);\n  --jcc-scene: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201600%201000%22%20width%3D%221600%22%20height%3D%221000%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22paper%22%20cx%3D%22.5%22%20cy%3D%22.42%22%20r%3D%22.78%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fdf9f0%22%2F%3E%3Cstop%20offset%3D%22.58%22%20stop-color%3D%22%23f7efdd%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23eadfc6%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22sun%22%20cx%3D%22.62%22%20cy%3D%22.12%22%20r%3D%22.58%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff8e6%22%20stop-opacity%3D%22.95%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%22.32%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22core%22%20cx%3D%22.5%22%20cy%3D%22.5%22%20r%3D%22.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.32%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%23c99a2e%22%20stop-opacity%3D%22.1%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a8822f%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22gold%22%20x1%3D%22.1%22%20y1%3D%220%22%20x2%3D%22.9%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8c477%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23c99a2e%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238a6413%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22vignette%22%20cx%3D%22.5%22%20cy%3D%22.44%22%20r%3D%22.82%22%3E%3Cstop%20offset%3D%22.52%22%20stop-color%3D%22%238a6d3b%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238a6d3b%22%20stop-opacity%3D%22.22%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22floor%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f3e8cf%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%22.7%22%20stop-color%3D%22%23f3e8cf%22%20stop-opacity%3D%22.55%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f3e8cf%22%20stop-opacity%3D%22.92%22%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%22soft%22%20x%3D%22-50%25%22%20y%3D%22-50%25%22%20width%3D%22200%25%22%20height%3D%22200%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2220%22%2F%3E%3C%2Ffilter%3E%3Csymbol%20id%3D%22hex%22%20viewBox%3D%22-10%20-10%2020%2020%22%3E%3Cpath%20d%3D%22M0-10%208.66-5%208.66%205%200%2010-8.66%205-8.66-5Z%22%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-width%3D%22.9%22%2F%3E%3C%2Fsymbol%3E%3C%2Fdefs%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23paper)%22%2F%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23sun)%22%2F%3E%3C!--%20old%20chart%20contours%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-opacity%3D%22.08%22%3E%3Cpath%20d%3D%22M-120%20128C220%2072%20430%20196%20760%20148S1330%2066%201720%20138%22%2F%3E%3Cpath%20d%3D%22M-120%20188C240%20130%20450%20258%20780%20206S1350%20124%201720%20196%22%2F%3E%3Cpath%20d%3D%22M-120%20252C200%20198%20480%20314%20800%20262S1360%20184%201720%20256%22%2F%3E%3Cpath%20d%3D%22M-120%20322C260%20268%20500%20382%20820%20330S1380%20250%201720%20322%22%2F%3E%3Cpath%20d%3D%22M-120%20398C240%20344%20520%20456%20840%20404S1400%20324%201720%20396%22%2F%3E%3Cpath%20d%3D%22M-120%20480C280%20424%20540%20536%20860%20484S1420%20404%201720%20476%22%2F%3E%3Cpath%20d%3D%22M-120%20566C240%20512%20560%20620%20880%20568S1440%20488%201720%20560%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23a8822f%22%20opacity%3D%22.18%22%3E%3Ccircle%20cx%3D%22286%22%20cy%3D%22132%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22612%22%20cy%3D%22198%22%20r%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%22944%22%20cy%3D%22146%22%20r%3D%221.3%22%2F%3E%3Ccircle%20cx%3D%221268%22%20cy%3D%22210%22%20r%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%22372%22%20cy%3D%22338%22%20r%3D%221.2%22%2F%3E%3Ccircle%20cx%3D%221084%22%20cy%3D%22368%22%20r%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22696%22%20cy%3D%22470%22%20r%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%221436%22%20cy%3D%22474%22%20r%3D%221.3%22%2F%3E%3Ccircle%20cx%3D%22182%22%20cy%3D%22566%22%20r%3D%221.2%22%2F%3E%3Ccircle%20cx%3D%221232%22%20cy%3D%22586%22%20r%3D%221.1%22%2F%3E%3C%2Fg%3E%3C!--%20arena%20floor%20--%3E%3Cellipse%20cx%3D%22800%22%20cy%3D%22596%22%20rx%3D%22600%22%20ry%3D%2248%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.5%22%2F%3E%3Cpath%20d%3D%22M-80%20610Q800%20552%201680%20610%22%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-opacity%3D%22.12%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20stroke-opacity%3D%22.07%22%3E%3Cpath%20d%3D%22M800%20590L-260%201000M800%20590L-40%201000M800%20590L180%201000M800%20590L400%201000M800%20590L620%201000M800%20590L800%201000M800%20590L980%201000M800%20590L1200%201000M800%20590L1420%201000M800%20590L1620%201000M800%20590L1860%201000%22%2F%3E%3Cpath%20d%3D%22M-140%20706Q800%20650%201740%20706%22%2F%3E%3Cpath%20d%3D%22M-140%20792Q800%20730%201740%20792%22%2F%3E%3Cpath%20d%3D%22M-140%20896Q800%20826%201740%20896%22%2F%3E%3Cpath%20d%3D%22M-140%201010Q800%20930%201740%201010%22%2F%3E%3C%2Fg%3E%3C!--%20arena%20rings%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M800%20306%201215.7%20546V1026L800%201266%20384.3%201026V546Z%22%20stroke-opacity%3D%22.1%22%20stroke-width%3D%221.1%22%2F%3E%3Cpath%20d%3D%22M800%20486%201059.8%20636v300L800%201086%20540.2%20936V636Z%22%20stroke-opacity%3D%22.16%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M800%20626%20940%20706v160L800%20946%20660%20866V706Z%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.4%22%2F%3E%3Ccircle%20cx%3D%22800%22%20cy%3D%22786%22%20r%3D%22466%22%20stroke-dasharray%3D%222%2018%22%20stroke-opacity%3D%22.12%22%2F%3E%3C%2Fg%3E%3C!--%20golden%20spatula%20watermark%20--%3E%3Cellipse%20cx%3D%221470%22%20cy%3D%22306%22%20rx%3D%22250%22%20ry%3D%22230%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.45%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cpath%20d%3D%22M1470%20126%201625.9%20216V396L1470%20486%201314.1%20396V216Z%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-opacity%3D%22.12%22%20stroke-width%3D%221.2%22%2F%3E%3Cg%20transform%3D%22translate(1470%20306)%20rotate(-12)%20scale(11)%20translate(-12%20-12)%22%20opacity%3D%22.18%22%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%2213%22%20rx%3D%2220%22%20ry%3D%2216%22%20fill%3D%22url(%23core)%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cg%20fill%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M14.4%203.2c1.9-.6%203.9-.3%205.5%201.1%201.4%201.6%201.7%203.6%201.1%205.5-.2.8-.7%201.5-1.3%202.1l-1.1%201.1-7.4-7.4%201.1-1.1c.6-.6%201.3-1.1%202.1-1.3Z%22%2F%3E%3Cpath%20d%3D%22M11.7%208.2%204.2%2015.7%22%20stroke%3D%22url(%23gold)%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C!--%20compass%20rose%20--%3E%3Cg%20transform%3D%22translate(212%20812)%22%20fill%3D%22none%22%20stroke%3D%22%23a8822f%22%20opacity%3D%22.16%22%3E%3Ccircle%20r%3D%2286%22%20stroke-opacity%3D%22.5%22%2F%3E%3Ccircle%20r%3D%2258%22%20stroke-dasharray%3D%221%209%22%2F%3E%3Cpath%20d%3D%22M0-86V86M-86%200H86M-61-61%2061%2061M61-61-61%2061%22%20stroke-opacity%3D%22.35%22%2F%3E%3Cpath%20d%3D%22M0-22%208%200%200%2022-8%200Z%22%20fill%3D%22%23a8822f%22%20stroke%3D%22none%22%20opacity%3D%22.7%22%2F%3E%3C%2Fg%3E%3C!--%20floating%20hexes%20--%3E%3Cg%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22262%22%20y%3D%22220%22%20width%3D%2230%22%20height%3D%2230%22%20opacity%3D%22.2%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221216%22%20y%3D%22470%22%20width%3D%2220%22%20height%3D%2220%22%20opacity%3D%22.16%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22442%22%20y%3D%22592%22%20width%3D%2226%22%20height%3D%2226%22%20opacity%3D%22.16%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221438%22%20y%3D%22752%22%20width%3D%2224%22%20height%3D%2224%22%20opacity%3D%22.14%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221046%22%20y%3D%22154%22%20width%3D%2216%22%20height%3D%2216%22%20opacity%3D%22.18%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22590%22%20y%3D%22252%22%20width%3D%2218%22%20height%3D%2218%22%20opacity%3D%22.15%22%2F%3E%3Ccircle%20cx%3D%22279%22%20cy%3D%22235%22%20r%3D%222%22%20fill%3D%22%23a8822f%22%20opacity%3D%22.26%22%2F%3E%3C%2Fg%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23vignette)%22%2F%3E%3Crect%20y%3D%22560%22%20width%3D%221600%22%20height%3D%22440%22%20fill%3D%22url(%23floor)%22%2F%3E%3C%2Fsvg%3E\");\n  background-color: #f7f1e3;\n  background-image:\n    var(--jcc-scene, none),\n    radial-gradient(\n      1100px 560px at 50% -220px,\n      color-mix(in srgb, var(--jcc-accent) 16%, transparent),\n      transparent 70%\n    ),\n    radial-gradient(\n      900px 500px at 104% 108%,\n      color-mix(in srgb, var(--jcc-accent-2) 10%, transparent),\n      transparent 72%\n    ),\n    repeating-linear-gradient(\n      60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      -60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      0deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p2), transparent) 0 1px,\n      transparent 1px calc(var(--jcc-grid) * 0.86)\n    );\n}\n\n:root[data-jcc=\"on\"] body[data-ds-dark-theme] {\n  --jcc-deco: var(--jcc-accent);\n  --jcc-scene: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201600%201000%22%20width%3D%221600%22%20height%3D%221000%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22sky%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2304060c%22%2F%3E%3Cstop%20offset%3D%22.42%22%20stop-color%3D%22%23070c17%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230b1424%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22dawn%22%20cx%3D%22.62%22%20cy%3D%22.2%22%20r%3D%22.6%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.26%22%2F%3E%3Cstop%20offset%3D%22.42%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.09%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22core%22%20cx%3D%22.5%22%20cy%3D%22.5%22%20r%3D%22.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%22.14%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22gold%22%20x1%3D%22.1%22%20y1%3D%220%22%20x2%3D%22.9%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fbf0d2%22%2F%3E%3Cstop%20offset%3D%22.42%22%20stop-color%3D%22%23e8c477%22%2F%3E%3Cstop%20offset%3D%22.78%22%20stop-color%3D%22%23c99a2e%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238a6413%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22handle%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f6e3b4%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a97f2e%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22vignette%22%20cx%3D%22.5%22%20cy%3D%22.44%22%20r%3D%22.8%22%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23000%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23000%22%20stop-opacity%3D%22.66%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22floor%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2304060c%22%20stop-opacity%3D%220%22%2F%3E%3Cstop%20offset%3D%22.62%22%20stop-color%3D%22%2304060c%22%20stop-opacity%3D%22.5%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2304060c%22%20stop-opacity%3D%22.92%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22crystal%22%20cx%3D%22.5%22%20cy%3D%22.35%22%20r%3D%22.7%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f6e3b4%22%20stop-opacity%3D%22.8%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e8c477%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3Cfilter%20id%3D%22soft%22%20x%3D%22-50%25%22%20y%3D%22-50%25%22%20width%3D%22200%25%22%20height%3D%22200%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2222%22%2F%3E%3C%2Ffilter%3E%3Cfilter%20id%3D%22bloom%22%20x%3D%22-50%25%22%20y%3D%22-50%25%22%20width%3D%22200%25%22%20height%3D%22200%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%227%22%2F%3E%3C%2Ffilter%3E%3Csymbol%20id%3D%22hex%22%20viewBox%3D%22-10%20-10%2020%2020%22%3E%3Cpath%20d%3D%22M0-10%208.66-5%208.66%205%200%2010-8.66%205-8.66-5Z%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-width%3D%22.9%22%2F%3E%3C%2Fsymbol%3E%3C%2Fdefs%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23sky)%22%2F%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23dawn)%22%2F%3E%3C!--%20arcane%20dust%20--%3E%3Cg%20fill%3D%22%23f6e3b4%22%3E%3Ccircle%20cx%3D%2286%22%20cy%3D%2292%22%20r%3D%221.1%22%20opacity%3D%22.42%22%2F%3E%3Ccircle%20cx%3D%22148%22%20cy%3D%22178%22%20r%3D%22.8%22%20opacity%3D%22.26%22%2F%3E%3Ccircle%20cx%3D%22232%22%20cy%3D%2264%22%20r%3D%221.4%22%20opacity%3D%22.5%22%2F%3E%3Ccircle%20cx%3D%22318%22%20cy%3D%22150%22%20r%3D%22.9%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%22410%22%20cy%3D%2286%22%20r%3D%221.1%22%20opacity%3D%22.34%22%2F%3E%3Ccircle%20cx%3D%22506%22%20cy%3D%22190%22%20r%3D%22.8%22%20opacity%3D%22.22%22%2F%3E%3Ccircle%20cx%3D%22596%22%20cy%3D%2272%22%20r%3D%221.3%22%20opacity%3D%22.42%22%2F%3E%3Ccircle%20cx%3D%22690%22%20cy%3D%22152%22%20r%3D%22.9%22%20opacity%3D%22.28%22%2F%3E%3Ccircle%20cx%3D%22792%22%20cy%3D%2258%22%20r%3D%221.2%22%20opacity%3D%22.46%22%2F%3E%3Ccircle%20cx%3D%22892%22%20cy%3D%22128%22%20r%3D%22.8%22%20opacity%3D%22.24%22%2F%3E%3Ccircle%20cx%3D%22990%22%20cy%3D%2274%22%20r%3D%221.4%22%20opacity%3D%22.4%22%2F%3E%3Ccircle%20cx%3D%221092%22%20cy%3D%22182%22%20r%3D%22.9%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%221194%22%20cy%3D%2292%22%20r%3D%221.1%22%20opacity%3D%22.44%22%2F%3E%3Ccircle%20cx%3D%221290%22%20cy%3D%22156%22%20r%3D%22.8%22%20opacity%3D%22.22%22%2F%3E%3Ccircle%20cx%3D%221392%22%20cy%3D%2266%22%20r%3D%221.3%22%20opacity%3D%22.4%22%2F%3E%3Ccircle%20cx%3D%221496%22%20cy%3D%22148%22%20r%3D%22.9%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%22336%22%20r%3D%22.8%22%20opacity%3D%22.2%22%2F%3E%3Ccircle%20cx%3D%22171%22%20cy%3D%22286%22%20r%3D%221.1%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%22286%22%20cy%3D%22360%22%20r%3D%22.8%22%20opacity%3D%22.18%22%2F%3E%3Ccircle%20cx%3D%22382%22%20cy%3D%22272%22%20r%3D%221.2%22%20opacity%3D%22.32%22%2F%3E%3Ccircle%20cx%3D%221230%22%20cy%3D%22300%22%20r%3D%221%22%20opacity%3D%22.26%22%2F%3E%3Ccircle%20cx%3D%221338%22%20cy%3D%22360%22%20r%3D%22.8%22%20opacity%3D%22.2%22%2F%3E%3Ccircle%20cx%3D%221446%22%20cy%3D%22286%22%20r%3D%221.2%22%20opacity%3D%22.3%22%2F%3E%3Ccircle%20cx%3D%221536%22%20cy%3D%22380%22%20r%3D%22.8%22%20opacity%3D%22.18%22%2F%3E%3C%2Fg%3E%3C!--%20horizon%20--%3E%3Cellipse%20cx%3D%22800%22%20cy%3D%22588%22%20rx%3D%22620%22%20ry%3D%2254%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.4%22%2F%3E%3Cpath%20d%3D%22M-80%20604Q800%20532%201680%20604%22%20fill%3D%22none%22%20stroke%3D%22%23e8c477%22%20stroke-opacity%3D%22.14%22%2F%3E%3Cpath%20d%3D%22M-80%20604Q800%20546%201680%20604%22%20fill%3D%22none%22%20stroke%3D%22%23f6e3b4%22%20stroke-opacity%3D%22.06%22%2F%3E%3C!--%20receding%20arena%20floor%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e8c477%22%20stroke-opacity%3D%22.09%22%3E%3Cpath%20d%3D%22M800%20566L-260%201000M800%20566L-40%201000M800%20566L180%201000M800%20566L400%201000M800%20566L620%201000M800%20566L800%201000M800%20566L980%201000M800%20566L1200%201000M800%20566L1420%201000M800%20566L1620%201000M800%20566L1860%201000%22%2F%3E%3Cpath%20d%3D%22M-140%20690Q800%20628%201740%20690%22%20stroke-opacity%3D%22.07%22%2F%3E%3Cpath%20d%3D%22M-140%20772Q800%20706%201740%20772%22%20stroke-opacity%3D%22.08%22%2F%3E%3Cpath%20d%3D%22M-140%20872Q800%20798%201740%20872%22%20stroke-opacity%3D%22.09%22%2F%3E%3Cpath%20d%3D%22M-140%20990Q800%20900%201740%20990%22%20stroke-opacity%3D%22.1%22%2F%3E%3C%2Fg%3E%3C!--%20hex%20arena%3A%20three%20tiers%20%2B%20rune%20ticks%20--%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M800%20280%201215.7%20520V1000L800%201240%20384.3%201000V520Z%22%20stroke-opacity%3D%22.14%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M800%20460%201059.8%20610v300L800%201060%20540.2%20910V610Z%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.4%22%2F%3E%3Cpath%20d%3D%22M800%20610%20940%20690v160L800%20930%20660%20850V690Z%22%20stroke-opacity%3D%22.3%22%20stroke-width%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%22800%22%20cy%3D%22770%22%20r%3D%22472%22%20stroke-dasharray%3D%222%2018%22%20stroke-opacity%3D%22.16%22%2F%3E%3C%2Fg%3E%3C!--%20platform%20glow%20--%3E%3Cellipse%20cx%3D%22800%22%20cy%3D%22792%22%20rx%3D%22230%22%20ry%3D%2270%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.55%22%20filter%3D%22url(%23bloom)%22%2F%3E%3C!--%20the%20golden%20spatula%2C%20an%20original%20geometric%20mark%20--%3E%3Cellipse%20cx%3D%221470%22%20cy%3D%22300%22%20rx%3D%22260%22%20ry%3D%22240%22%20fill%3D%22url(%23core)%22%20opacity%3D%22.42%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cpath%20d%3D%22M1470%20120%201625.9%20210V390L1470%20480%201314.1%20390V210Z%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-opacity%3D%22.14%22%20stroke-width%3D%221.2%22%2F%3E%3Cg%20transform%3D%22translate(1470%20300)%20rotate(-12)%20scale(11.5)%20translate(-12%20-12)%22%20opacity%3D%22.26%22%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%2213%22%20rx%3D%2222%22%20ry%3D%2218%22%20fill%3D%22url(%23crystal)%22%20opacity%3D%22.5%22%20filter%3D%22url(%23soft)%22%2F%3E%3Cg%20fill%3D%22url(%23gold)%22%3E%3Cpath%20d%3D%22M14.4%203.2c1.9-.6%203.9-.3%205.5%201.1%201.4%201.6%201.7%203.6%201.1%205.5-.2.8-.7%201.5-1.3%202.1l-1.1%201.1-7.4-7.4%201.1-1.1c.6-.6%201.3-1.1%202.1-1.3Z%22%2F%3E%3Cpath%20d%3D%22M11.7%208.2%204.2%2015.7%22%20stroke%3D%22url(%23handle)%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C!--%20floating%20hex%20crystals%20--%3E%3Cg%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22214%22%20y%3D%22196%22%20width%3D%2234%22%20height%3D%2234%22%20opacity%3D%22.36%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221228%22%20y%3D%22452%22%20width%3D%2222%22%20height%3D%2222%22%20opacity%3D%22.24%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22408%22%20y%3D%22548%22%20width%3D%2230%22%20height%3D%2230%22%20opacity%3D%22.26%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221464%22%20y%3D%22742%22%20width%3D%2226%22%20height%3D%2226%22%20opacity%3D%22.2%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22118%22%20y%3D%22764%22%20width%3D%2220%22%20height%3D%2220%22%20opacity%3D%22.18%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%221058%22%20y%3D%22140%22%20width%3D%2216%22%20height%3D%2216%22%20opacity%3D%22.28%22%2F%3E%3Cuse%20href%3D%22%23hex%22%20x%3D%22596%22%20y%3D%22228%22%20width%3D%2218%22%20height%3D%2218%22%20opacity%3D%22.22%22%2F%3E%3Ccircle%20cx%3D%22231%22%20cy%3D%22212%22%20r%3D%222%22%20fill%3D%22%23f6e3b4%22%20opacity%3D%22.4%22%2F%3E%3Ccircle%20cx%3D%221238%22%20cy%3D%22463%22%20r%3D%221.6%22%20fill%3D%22%23f6e3b4%22%20opacity%3D%22.34%22%2F%3E%3Ccircle%20cx%3D%22421%22%20cy%3D%22563%22%20r%3D%222%22%20fill%3D%22%23f6e3b4%22%20opacity%3D%22.3%22%2F%3E%3C%2Fg%3E%3C!--%20frame%20light%20--%3E%3Crect%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22url(%23vignette)%22%2F%3E%3Crect%20y%3D%22560%22%20width%3D%221600%22%20height%3D%22440%22%20fill%3D%22url(%23floor)%22%2F%3E%3C%2Fsvg%3E\");\n  background-color: #080b14;\n  background-image:\n    var(--jcc-scene, none),\n    radial-gradient(\n      1200px 620px at 50% -240px,\n      color-mix(in srgb, var(--jcc-accent) 15%, transparent),\n      transparent 70%\n    ),\n    radial-gradient(\n      1000px 560px at 106% 110%,\n      color-mix(in srgb, var(--jcc-accent) 9%, transparent),\n      transparent 72%\n    ),\n    repeating-linear-gradient(\n      60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      -60deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p), transparent) 0 1px,\n      transparent 1px var(--jcc-grid)\n    ),\n    repeating-linear-gradient(\n      0deg,\n      color-mix(in srgb, var(--jcc-deco) var(--jcc-grid-p2), transparent) 0 1px,\n      transparent 1px calc(var(--jcc-grid) * 0.86)\n    );\n}\n\n/* A thin arcane seam along the top edge of the viewport. */\n:root[data-jcc=\"on\"] body::before {\n  content: \"\";\n  position: fixed;\n  inset: 0 0 auto 0;\n  height: 1px;\n  z-index: 2147482000;\n  pointer-events: none;\n  background: linear-gradient(\n    90deg,\n    transparent,\n    color-mix(in srgb, var(--jcc-accent) 78%, transparent) 22%,\n    color-mix(in srgb, var(--jcc-accent-2) 90%, transparent) 50%,\n    color-mix(in srgb, var(--jcc-accent) 78%, transparent) 78%,\n    transparent\n  );\n  opacity: 0.7;\n}\n\n:root[data-jcc=\"on\"] ::selection {\n  background: color-mix(in srgb, var(--jcc-accent) 38%, transparent);\n}\n\n:root[data-jcc=\"on\"] a[href]:hover {\n  text-shadow: 0 0 10px color-mix(in srgb, var(--jcc-accent) 55%, transparent);\n}\n\n/* ── 2. Ambience: dust and a slow aurora behind the app ──────────────────── */\n\n.jcc-ambience {\n  position: fixed;\n  inset: 0;\n  z-index: -1;\n  display: none;\n  overflow: hidden;\n  pointer-events: none;\n}\n\n:root[data-jcc=\"on\"][data-jcc-ambience=\"on\"] .jcc-ambience {\n  display: block;\n}\n\n.jcc-ambience::before,\n.jcc-ambience::after {\n  content: \"\";\n  position: absolute;\n  inset: -30%;\n  background-image:\n    radial-gradient(circle at 12% 24%, color-mix(in srgb, var(--jcc-deco) 62%, transparent) 0 1.3px, transparent 1.9px),\n    radial-gradient(circle at 68% 12%, color-mix(in srgb, var(--jcc-deco) 48%, transparent) 0 1px, transparent 1.6px),\n    radial-gradient(circle at 38% 66%, color-mix(in srgb, var(--jcc-deco) 56%, transparent) 0 1.5px, transparent 2.1px),\n    radial-gradient(circle at 86% 54%, color-mix(in srgb, var(--jcc-deco) 40%, transparent) 0 1px, transparent 1.5px),\n    radial-gradient(circle at 58% 88%, color-mix(in srgb, var(--jcc-deco) 52%, transparent) 0 1.2px, transparent 1.8px),\n    radial-gradient(circle at 8% 76%, color-mix(in srgb, var(--jcc-deco) 38%, transparent) 0 0.9px, transparent 1.4px);\n  background-size: 460px 460px, 610px 610px, 380px 380px, 720px 720px, 520px 520px, 840px 840px;\n  animation: jcc-drift 180s linear infinite;\n  opacity: 0.5;\n}\n\n.jcc-ambience::after {\n  animation-direction: reverse;\n  animation-duration: 260s;\n  opacity: 0.26;\n}\n\n.jcc-aurora {\n  position: absolute;\n  top: -30%;\n  left: 50%;\n  width: 120vmax;\n  height: 90vmax;\n  transform: translateX(-50%);\n  background: radial-gradient(\n    ellipse at center,\n    color-mix(in srgb, var(--jcc-accent) 13%, transparent),\n    transparent 66%\n  );\n  opacity: 0.45;\n  animation: jcc-breathe 22s ease-in-out infinite alternate;\n}\n\n/* ── 3. Launcher: the hex core in the bottom-right corner ────────────────── */\n\n.jcc-dock {\n  position: fixed;\n  right: 18px;\n  bottom: 18px;\n  z-index: 2147483000;\n  width: 46px;\n  height: 52px;\n  pointer-events: none;\n}\n\n.jcc-dock *,\n.jcc-panel *,\n.jcc-panel {\n  box-sizing: border-box;\n}\n\n.jcc-halo {\n  position: absolute;\n  inset: -9px;\n  border-radius: 50%;\n  background: conic-gradient(\n    from 0deg,\n    transparent 0 66%,\n    color-mix(in srgb, var(--jcc-accent) 85%, transparent) 84%,\n    transparent 100%\n  );\n  filter: blur(9px);\n  opacity: 0.55;\n  animation: jcc-orbit 9s linear infinite;\n  pointer-events: none;\n}\n\n.jcc-orb {\n  position: relative;\n  display: grid;\n  place-items: center;\n  width: 46px;\n  height: 52px;\n  padding: 0;\n  border: 0;\n  cursor: pointer;\n  pointer-events: auto;\n  color: var(--jcc-accent-2);\n  background: linear-gradient(\n    165deg,\n    var(--jcc-accent-2),\n    var(--jcc-accent) 48%,\n    var(--jcc-accent-deep)\n  );\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.4));\n  transition: transform 0.18s var(--jcc-ease), filter 0.18s var(--jcc-ease);\n}\n\n.jcc-orb::before {\n  content: \"\";\n  position: absolute;\n  inset: 2px;\n  clip-path: inherit;\n  background:\n    radial-gradient(circle at 50% 26%, #243352, #0a0f1b 74%),\n    repeating-linear-gradient(\n      60deg,\n      rgba(255, 255, 255, 0.05) 0 1px,\n      transparent 1px 9px\n    );\n}\n\n.jcc-orb svg {\n  position: relative;\n  z-index: 1;\n  width: 22px;\n  height: 22px;\n  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--jcc-accent) 65%, transparent));\n}\n\n.jcc-orb:hover {\n  transform: translateY(-1px) scale(1.04);\n  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45))\n    drop-shadow(0 0 14px color-mix(in srgb, var(--jcc-accent) 45%, transparent));\n}\n\n.jcc-orb:active {\n  transform: scale(0.97);\n}\n\n.jcc-orb:focus-visible {\n  outline: none;\n  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--jcc-accent) 85%, transparent));\n}\n\n.jcc-orb:focus-visible::before {\n  inset: 4px;\n  box-shadow: inset 0 0 0 2px var(--jcc-accent-2);\n}\n\n.jcc-dock:has(.jcc-orb:focus-visible)::after {\n  content: \"\";\n  position: absolute;\n  inset: -5px;\n  border: 2px solid var(--jcc-accent-2);\n  border-radius: 16px;\n  opacity: 0.9;\n  pointer-events: none;\n}\n\n.jcc-orb.is-open {\n  transform: scale(0.96);\n}\n\n:root[data-jcc=\"off\"] .jcc-halo {\n  opacity: 0.12;\n  animation: none;\n}\n\n:root[data-jcc=\"off\"] .jcc-orb {\n  filter: grayscale(0.55) brightness(0.86) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));\n}\n\n/* ── 4. Panel: the hex-core HUD ─────────────────────────────────────────── */\n\n.jcc-panel {\n  position: fixed;\n  right: 18px;\n  bottom: 82px;\n  z-index: 2147483001;\n  width: 278px;\n  max-height: calc(100vh - 160px);\n  overflow: auto;\n  padding: 14px 14px 12px;\n  color: var(--jcc-hud-text);\n  background:\n    radial-gradient(\n      220px 140px at 100% 0,\n      color-mix(in srgb, var(--jcc-accent) 12%, transparent),\n      transparent 70%\n    ),\n    linear-gradient(180deg, #131c2e, var(--jcc-hud-bg) 72%);\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 42%, transparent);\n  border-radius: var(--jcc-radius-panel);\n  box-shadow:\n    0 26px 70px rgba(0, 0, 0, 0.55),\n    0 0 0 1px rgba(0, 0, 0, 0.35),\n    0 0 40px -14px color-mix(in srgb, var(--jcc-accent) 60%, transparent);\n  font: 400 13px/1.45 var(--dsw-font-family, system-ui, sans-serif);\n  -webkit-backdrop-filter: blur(var(--jcc-panel-blur)) saturate(1.1);\n  backdrop-filter: blur(var(--jcc-panel-blur)) saturate(1.1);\n  animation: jcc-pop 0.18s var(--jcc-ease);\n}\n\n.jcc-panel[hidden] {\n  display: none;\n}\n\n.jcc-panel::before {\n  content: \"\";\n  position: absolute;\n  top: 0;\n  left: 18px;\n  right: 18px;\n  height: 1px;\n  background: linear-gradient(\n    90deg,\n    transparent,\n    color-mix(in srgb, var(--jcc-accent) 80%, transparent),\n    transparent\n  );\n}\n\n.jcc-panel button:focus-visible {\n  outline: 2px solid var(--jcc-accent-2);\n  outline-offset: 2px;\n}\n\n.jcc-panel__top {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  padding-bottom: 11px;\n  border-bottom: 1px solid var(--jcc-hud-line);\n}\n\n.jcc-brand {\n  display: flex;\n  align-items: center;\n  gap: 9px;\n  min-width: 0;\n}\n\n.jcc-mark {\n  display: grid;\n  place-items: center;\n  flex: none;\n  width: 30px;\n  height: 34px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: linear-gradient(160deg, var(--jcc-accent-2), var(--jcc-accent-deep));\n  color: #10131c;\n}\n\n.jcc-mark svg {\n  width: 15px;\n  height: 15px;\n}\n\n.jcc-brand b {\n  display: block;\n  font-size: 13.5px;\n  font-weight: 600;\n  letter-spacing: 0.06em;\n  line-height: 1.25;\n}\n\n.jcc-brand small {\n  display: block;\n  margin-top: 2px;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  letter-spacing: 0.04em;\n  white-space: nowrap;\n}\n\n.jcc-x {\n  display: grid;\n  place-items: center;\n  flex: none;\n  width: 26px;\n  height: 26px;\n  padding: 0;\n  border: 0;\n  border-radius: calc(var(--jcc-radius-control) - 2px);\n  color: var(--jcc-hud-text-3);\n  background: transparent;\n  cursor: pointer;\n}\n\n.jcc-x:hover {\n  color: var(--jcc-hud-text);\n  background: rgba(255, 255, 255, 0.07);\n}\n\n.jcc-row {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  padding: 11px 0;\n}\n\n.jcc-field {\n  display: flex;\n  flex-direction: column;\n  gap: 9px;\n  padding: 11px 0;\n}\n\n.jcc-row + .jcc-field,\n.jcc-field + .jcc-field,\n.jcc-field + .jcc-row {\n  border-top: 1px solid rgba(255, 255, 255, 0.06);\n}\n\n.jcc-label {\n  color: var(--jcc-hud-text-2);\n  font-size: 12.5px;\n  letter-spacing: 0.02em;\n}\n\n.jcc-label em {\n  margin-left: 5px;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  font-style: normal;\n}\n\n/* switch */\n.jcc-switch {\n  position: relative;\n  flex: none;\n  width: 40px;\n  height: 22px;\n  padding: 0;\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 40%, transparent);\n  border-radius: var(--jcc-radius-pill);\n  background: rgba(255, 255, 255, 0.08);\n  cursor: pointer;\n  transition: background 0.18s, border-color 0.18s;\n}\n\n.jcc-switch > span {\n  position: absolute;\n  top: 2px;\n  left: 2px;\n  width: 16px;\n  height: 16px;\n  border-radius: 50%;\n  background: var(--jcc-hud-text-3);\n  transition: transform 0.18s var(--jcc-ease), background 0.18s;\n}\n\n.jcc-switch[aria-checked=\"true\"] {\n  border-color: transparent;\n  background: linear-gradient(90deg, var(--jcc-accent-deep), var(--jcc-accent));\n}\n\n.jcc-switch[aria-checked=\"true\"] > span {\n  transform: translateX(18px);\n  background: #12100a;\n}\n\n/* accent swatches */\n.jcc-swatches {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 6px;\n}\n\n.jcc-swatch {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 5px;\n  padding: 7px 2px 6px;\n  border: 1px solid rgba(255, 255, 255, 0.1);\n  border-radius: var(--jcc-radius-control);\n  color: var(--jcc-hud-text-3);\n  background: transparent;\n  font: inherit;\n  font-size: 10px;\n  letter-spacing: 0.02em;\n  cursor: pointer;\n  transition: border-color 0.15s, background 0.15s, color 0.15s;\n}\n\n.jcc-swatch:hover {\n  background: rgba(255, 255, 255, 0.05);\n}\n\n.jcc-swatch[aria-pressed=\"true\"] {\n  color: var(--jcc-hud-text);\n  border-color: color-mix(in srgb, var(--jcc-accent) 60%, transparent);\n  background: color-mix(in srgb, var(--jcc-accent) 10%, transparent);\n}\n\n.jcc-hex {\n  width: 22px;\n  height: 25px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: linear-gradient(160deg, #f6e3b4, #c99a2e 60%, #8a6413);\n  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);\n}\n\n.jcc-swatch[data-accent=\"cyan\"] .jcc-hex {\n  background: linear-gradient(160deg, #a8fff3, #2ec4b6 60%, #0b6b63);\n}\n\n.jcc-swatch[data-accent=\"violet\"] .jcc-hex {\n  background: linear-gradient(160deg, #e2d6ff, #9b7bea 60%, #5b3bbd);\n}\n\n.jcc-swatch[data-accent=\"blue\"] .jcc-hex {\n  background: linear-gradient(160deg, #d6e9ff, #4f93f0 60%, #1f5aa6);\n}\n\n/* texture segmented control */\n.jcc-seg {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 2px;\n  padding: 2px;\n  border: 1px solid rgba(255, 255, 255, 0.09);\n  border-radius: calc(var(--jcc-radius-control) - 1px);\n  background: rgba(255, 255, 255, 0.04);\n}\n\n.jcc-seg--two {\n  grid-template-columns: repeat(2, 1fr);\n}\n\n.jcc-seg button {\n  padding: 5px 0;\n  border: 0;\n  border-radius: calc(var(--jcc-radius-control) - 3px);\n  color: var(--jcc-hud-text-3);\n  background: transparent;\n  font: inherit;\n  font-size: 11.5px;\n  cursor: pointer;\n}\n\n.jcc-seg button[aria-pressed=\"true\"] {\n  color: var(--jcc-hud-text);\n  background: rgba(255, 255, 255, 0.09);\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);\n}\n\n.jcc-panel__foot {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n  margin-top: 2px;\n  padding-top: 10px;\n  border-top: 1px solid var(--jcc-hud-line);\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  letter-spacing: 0.02em;\n}\n\n.jcc-reset {\n  padding: 2px 4px;\n  border: 0;\n  border-radius: calc(var(--jcc-radius-control) - 4px);\n  color: var(--jcc-accent-2);\n  background: transparent;\n  font: inherit;\n  font-size: 11px;\n  cursor: pointer;\n}\n\n.jcc-reset:hover {\n  background: rgba(255, 255, 255, 0.06);\n}\n\n/* ── 5. Augment draft, cards and codex ──────────────────────────────────── */\n\n.jcc-draft-btn {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  width: 100%;\n  padding: 10px 11px;\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 42%, transparent);\n  border-radius: var(--jcc-radius-control);\n  color: var(--jcc-hud-text);\n  background:\n    linear-gradient(\n      120deg,\n      color-mix(in srgb, var(--jcc-accent) 14%, transparent),\n      transparent 58%\n    ),\n    rgba(255, 255, 255, 0.03);\n  font: inherit;\n  text-align: left;\n  cursor: pointer;\n  transition: border-color 0.15s, background 0.15s;\n}\n\n.jcc-draft-btn:hover {\n  border-color: color-mix(in srgb, var(--jcc-accent) 72%, transparent);\n  background:\n    linear-gradient(\n      120deg,\n      color-mix(in srgb, var(--jcc-accent) 22%, transparent),\n      transparent 58%\n    ),\n    rgba(255, 255, 255, 0.04);\n}\n\n.jcc-draft-btn__mark {\n  display: grid;\n  place-items: center;\n  flex: none;\n  width: 30px;\n  height: 34px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: linear-gradient(160deg, var(--jcc-accent-2), var(--jcc-accent-deep));\n  color: #10131c;\n}\n\n.jcc-draft-btn__mark svg {\n  width: 16px;\n  height: 16px;\n}\n\n.jcc-draft-btn__text {\n  display: flex;\n  flex: 1;\n  flex-direction: column;\n  gap: 2px;\n  min-width: 0;\n}\n\n.jcc-draft-btn__text b {\n  font-size: 13px;\n  font-weight: 600;\n  letter-spacing: 0.04em;\n}\n\n.jcc-draft-btn__text small {\n  overflow: hidden;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.jcc-draft-btn__chev {\n  color: var(--jcc-hud-text-3);\n  font-size: 17px;\n  line-height: 1;\n}\n\n.jcc-progress {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin-top: 8px;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  letter-spacing: 0.02em;\n}\n\n.jcc-progress__label b {\n  color: var(--jcc-hud-text);\n  font-weight: 600;\n}\n\n.jcc-progress__hexes {\n  display: flex;\n  gap: 3px;\n  margin-left: auto;\n}\n\n.jcc-progress__hexes i {\n  width: 7px;\n  height: 8px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: rgba(255, 255, 255, 0.14);\n}\n\n.jcc-progress__hexes i.is-on {\n  background: var(--jcc-accent);\n  box-shadow: 0 0 6px color-mix(in srgb, var(--jcc-accent) 65%, transparent);\n}\n\n.jcc-progress.is-complete .jcc-progress__label b {\n  color: var(--jcc-accent-2);\n}\n\n.jcc-link {\n  padding: 1px 2px;\n  border: 0;\n  border-radius: 4px;\n  color: var(--jcc-accent-2);\n  background: transparent;\n  font: inherit;\n  font-size: 10.5px;\n  cursor: pointer;\n}\n\n.jcc-link:hover {\n  color: var(--jcc-hud-text);\n}\n\n/* overlay shell */\n.jcc-overlay {\n  position: fixed;\n  inset: 0;\n  z-index: 2147483002;\n  display: grid;\n  place-items: center;\n  padding: 20px;\n  color: var(--jcc-hud-text);\n  font: 400 13px/1.45 var(--dsw-font-family, system-ui, sans-serif);\n}\n\n.jcc-overlay[hidden] {\n  display: none;\n}\n\n.jcc-scrim {\n  position: absolute;\n  inset: 0;\n  background:\n    radial-gradient(900px 500px at 50% 30%, rgba(20, 30, 50, 0.25), transparent 70%),\n    rgba(3, 6, 12, 0.58);\n  -webkit-backdrop-filter: blur(4px);\n  backdrop-filter: blur(4px);\n}\n\n.jcc-tray {\n  position: relative;\n  z-index: 1;\n  width: min(680px, 100%);\n  max-height: calc(100vh - 40px);\n  overflow: auto;\n  padding: 16px;\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 38%, transparent);\n  border-radius: var(--jcc-radius-panel);\n  background: linear-gradient(180deg, #131c2e, #0a0f1b 78%);\n  box-shadow:\n    0 30px 80px rgba(0, 0, 0, 0.66),\n    0 0 0 1px rgba(0, 0, 0, 0.35),\n    0 0 46px -16px color-mix(in srgb, var(--jcc-accent) 55%, transparent);\n  animation: jcc-tray-in 0.2s var(--jcc-ease);\n}\n\n.jcc-tray__head {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid var(--jcc-hud-line);\n}\n\n.jcc-tray__title {\n  display: flex;\n  flex: 1;\n  flex-direction: column;\n  gap: 2px;\n  min-width: 0;\n}\n\n.jcc-tray__title b {\n  font-size: 15px;\n  font-weight: 600;\n  letter-spacing: 0.08em;\n}\n\n.jcc-tray__title small {\n  overflow: hidden;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.jcc-chip {\n  flex: none;\n  padding: 2px 8px;\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 45%, transparent);\n  border-radius: 999px;\n  color: var(--jcc-accent-2);\n  font-size: 10px;\n  letter-spacing: 0.04em;\n  white-space: nowrap;\n}\n\n.jcc-tray button:not(.jcc-card):not(.jcc-codex-card):focus-visible {\n  outline: 2px solid var(--jcc-accent-2);\n  outline-offset: 2px;\n}\n\n/* three-card draft */\n.jcc-cards {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 10px;\n  margin: 14px 0;\n}\n\n.jcc-card {\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  gap: 7px;\n  min-height: 246px;\n  padding: 12px 11px 10px;\n  border: 1px solid color-mix(in srgb, var(--card-accent) 38%, transparent);\n  border-radius: var(--jcc-radius-control);\n  color: var(--jcc-hud-text);\n  background:\n    radial-gradient(\n      150px 100px at 50% 0,\n      color-mix(in srgb, var(--card-accent) 18%, transparent),\n      transparent 72%\n    ),\n    linear-gradient(180deg, #101a2c, #0a101c);\n  font: inherit;\n  text-align: left;\n  cursor: pointer;\n  animation: jcc-deal 0.34s var(--jcc-ease) both;\n  transition: transform 0.18s var(--jcc-ease), border-color 0.18s, box-shadow 0.18s;\n}\n\n.jcc-card:hover {\n  transform: translateY(-4px);\n  border-color: color-mix(in srgb, var(--card-accent) 74%, transparent);\n  box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--card-accent) 65%, transparent);\n}\n\n.jcc-card:focus-visible {\n  outline: 1px solid color-mix(in srgb, var(--card-accent-2) 80%, transparent);\n  outline-offset: 2px;\n  box-shadow: 0 0 0 4px color-mix(in srgb, var(--card-accent-2) 10%, transparent);\n}\n\n.jcc-card__badge {\n  position: absolute;\n  top: 8px;\n  right: 8px;\n  z-index: 1;\n  padding: 1px 6px;\n  border-radius: 999px;\n  color: var(--jcc-hud-text-2);\n  background: rgba(0, 0, 0, 0.38);\n  font-size: 9px;\n  letter-spacing: 0.03em;\n}\n\n.jcc-card__art {\n  display: grid;\n  place-items: center;\n  height: 92px;\n  margin: 2px 0 1px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: linear-gradient(\n    160deg,\n    var(--card-accent-2),\n    var(--card-accent) 55%,\n    var(--card-accent-deep)\n  );\n  color: #10131c;\n}\n\n.jcc-card__art svg {\n  width: 36px;\n  height: 36px;\n  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.28));\n}\n\n.jcc-card__name {\n  font-size: 12.5px;\n  font-weight: 600;\n  letter-spacing: 0.02em;\n  line-height: 1.35;\n}\n\n.jcc-card__flavor {\n  flex: 1;\n  color: var(--jcc-hud-text-3);\n  font-size: 10.5px;\n  line-height: 1.55;\n}\n\n.jcc-card__tex {\n  height: 22px;\n  border: 1px solid rgba(255, 255, 255, 0.07);\n  border-radius: 5px;\n  background-color: rgba(255, 255, 255, 0.02);\n  background-image:\n    repeating-linear-gradient(\n      60deg,\n      color-mix(in srgb, var(--card-accent) 50%, transparent) 0 1px,\n      transparent 1px 9px\n    ),\n    repeating-linear-gradient(\n      -60deg,\n      color-mix(in srgb, var(--card-accent) 50%, transparent) 0 1px,\n      transparent 1px 9px\n    ),\n    repeating-linear-gradient(\n      0deg,\n      color-mix(in srgb, var(--card-accent) 35%, transparent) 0 1px,\n      transparent 1px 11px\n    );\n  opacity: 0.62;\n}\n\n.jcc-card__cta {\n  align-self: flex-start;\n  padding: 3px 9px;\n  border: 1px solid color-mix(in srgb, var(--card-accent) 48%, transparent);\n  border-radius: 999px;\n  color: var(--card-accent-2);\n  font-size: 10.5px;\n  letter-spacing: 0.04em;\n}\n\n/* codex */\n.jcc-codex-grid {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 8px;\n  margin: 14px 0;\n}\n\n.jcc-codex-card {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 5px;\n  padding: 10px 6px 8px;\n  border: 1px solid rgba(255, 255, 255, 0.1);\n  border-radius: var(--jcc-radius-control);\n  color: var(--jcc-hud-text-2);\n  background: #0d1424;\n  font: inherit;\n  text-align: center;\n  cursor: pointer;\n  transition: border-color 0.15s, background 0.15s;\n}\n\n.jcc-codex-card:focus-visible {\n  outline: 1px solid color-mix(in srgb, var(--card-accent-2) 80%, transparent);\n  outline-offset: 2px;\n  box-shadow: 0 0 0 4px color-mix(in srgb, var(--card-accent-2) 10%, transparent);\n}\n\n.jcc-codex-card:hover:not(:disabled) {\n  border-color: color-mix(in srgb, var(--card-accent) 65%, transparent);\n  background: rgba(255, 255, 255, 0.04);\n}\n\n.jcc-codex-card.is-locked {\n  opacity: 0.36;\n  filter: grayscale(1);\n  cursor: not-allowed;\n}\n\n.jcc-codex-card__hex {\n  width: 24px;\n  height: 28px;\n  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);\n  background: linear-gradient(160deg, var(--card-accent-2), var(--card-accent), var(--card-accent-deep));\n}\n\n.jcc-codex-card__name {\n  overflow: hidden;\n  width: 100%;\n  color: var(--jcc-hud-text);\n  font-size: 10px;\n  line-height: 1.35;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.jcc-codex-card__state {\n  color: var(--jcc-hud-text-3);\n  font-size: 9px;\n  letter-spacing: 0.02em;\n}\n\n.jcc-tray__foot {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  padding-top: 12px;\n  border-top: 1px solid var(--jcc-hud-line);\n}\n\n.jcc-tray-btn {\n  padding: 7px 14px;\n  border: 1px solid color-mix(in srgb, var(--jcc-accent) 45%, transparent);\n  border-radius: var(--jcc-radius-control);\n  color: var(--jcc-hud-text);\n  background: color-mix(in srgb, var(--jcc-accent) 12%, transparent);\n  font: inherit;\n  font-size: 12px;\n  cursor: pointer;\n}\n\n.jcc-tray-btn:hover {\n  background: color-mix(in srgb, var(--jcc-accent) 22%, transparent);\n}\n\n.jcc-tray-link {\n  padding: 2px 4px;\n  border: 0;\n  border-radius: 4px;\n  color: var(--jcc-accent-2);\n  background: transparent;\n  font: inherit;\n  font-size: 11.5px;\n  cursor: pointer;\n}\n\n.jcc-tray-link b {\n  color: var(--jcc-hud-text);\n}\n\n.jcc-tray-link.is-danger {\n  color: #f0a3a3;\n}\n\n.jcc-tray-link:disabled {\n  color: var(--jcc-hud-text-3);\n  cursor: default;\n  opacity: 0.5;\n}\n\n@keyframes jcc-tray-in {\n  from {\n    opacity: 0;\n    transform: translateY(10px) scale(0.99);\n  }\n}\n\n@keyframes jcc-deal {\n  from {\n    opacity: 0;\n    transform: translateY(16px) rotateX(-8deg);\n  }\n  to {\n    opacity: 1;\n    transform: none;\n  }\n}\n\n/* ── 6. Motion ──────────────────────────────────────────────────────────── */\n\n@keyframes jcc-orbit {\n  to {\n    transform: rotate(360deg);\n  }\n}\n\n@keyframes jcc-pop {\n  from {\n    opacity: 0;\n    transform: translateY(6px) scale(0.985);\n  }\n}\n\n@keyframes jcc-drift {\n  from {\n    transform: translate3d(0, 0, 0);\n  }\n  to {\n    transform: translate3d(-140px, -180px, 0);\n  }\n}\n\n@keyframes jcc-breathe {\n  from {\n    opacity: 0.3;\n    transform: translateX(-50%) scale(1);\n  }\n  to {\n    opacity: 0.55;\n    transform: translateX(-50%) scale(1.06);\n  }\n}\n\n/* ── 7. Small screens ───────────────────────────────────────────────────── */\n\n@media (max-width: 680px) {\n  .jcc-overlay {\n    padding: 10px;\n  }\n\n  .jcc-tray {\n    padding: 12px;\n    max-height: calc(100vh - 20px);\n  }\n\n  .jcc-cards {\n    grid-template-columns: repeat(3, 44vw);\n    overflow-x: auto;\n    padding-bottom: 4px;\n  }\n\n  .jcc-card {\n    min-height: 226px;\n  }\n\n  .jcc-codex-grid {\n    grid-template-columns: repeat(3, 1fr);\n  }\n}\n\n@media (max-width: 860px) {\n  .jcc-dock {\n    right: 12px;\n    bottom: 92px;\n    transform: scale(0.94);\n    transform-origin: bottom right;\n  }\n\n  .jcc-panel {\n    right: 12px;\n    bottom: 152px;\n    width: min(278px, calc(100vw - 24px));\n    max-height: calc(100vh - 240px);\n  }\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .jcc-halo {\n    animation: none;\n  }\n\n  .jcc-ambience::before,\n  .jcc-ambience::after,\n  .jcc-aurora,\n  .jcc-tray,\n  .jcc-card {\n    animation: none;\n  }\n\n  .jcc-panel {\n    animation: none;\n  }\n\n  .jcc-orb,\n  .jcc-switch,\n  .jcc-switch > span,\n  .jcc-swatch {\n    transition: none;\n  }\n}\n"
 
   /* ---------------------------------------------------------------------
    * Palette
@@ -203,6 +205,23 @@
     }
   }
 
+  /** The 12 cosmetic cards: every accent × texture pair. */
+  var CARDS = []
+  var CARD_IDS = []
+  var CARD_BY_ID = Object.create(null)
+  for (var ca = 0; ca < ACCENT_IDS.length; ca += 1) {
+    for (var ct = 0; ct < TEXTURES.length; ct += 1) {
+      var cardDef = {
+        id: ACCENT_IDS[ca] + '-' + TEXTURES[ct],
+        accent: ACCENT_IDS[ca],
+        texture: TEXTURES[ct]
+      }
+      CARDS.push(cardDef)
+      CARD_IDS.push(cardDef.id)
+      CARD_BY_ID[cardDef.id] = cardDef
+    }
+  }
+
   /** One accent's derived tokens. `line` is a six-digit hex; alpha is appended. */
   function accentTokens(id, scheme) {
     var a = ACCENTS[id][scheme]
@@ -303,6 +322,28 @@
       cornersSoft: '圆润',
       cornersSharp: '锐利',
       ambience: '氛围光效',
+      draft: '海克斯强化',
+      draftSub: '三选一 · 无限重抽',
+      cardTextures: ['淡纹', '标准', '浓烈'],
+      codexShort: '图鉴',
+      codexView: '查看',
+      codex: '海克斯图鉴',
+      codexSub: '收集 12 张外观卡',
+      equip: '装备',
+      owned: '已拥有',
+      locked: '未解锁',
+      collected: '已收集',
+      redraw: '重新抽取',
+      clear: '清空收集',
+      clearConfirm: '再点一次清空',
+      allCollected: '全图鉴',
+      goDraw: '去抽取',
+      flavors: {
+        gold: '金币在棋盘边缘燃烧。',
+        cyan: '奥术在六边形之间流动。',
+        violet: '紫电压住了最后一排。',
+        blue: '星光落在最后一格。'
+      },
       reset: '恢复默认',
       close: '关闭',
       open: '金铲铲主题设置',
@@ -322,6 +363,28 @@
       cornersSoft: 'Soft',
       cornersSharp: 'Sharp',
       ambience: 'Ambience',
+      draft: 'Hextech augment',
+      draftSub: 'Pick one of three · unlimited redraws',
+      cardTextures: ['Subtle', 'Standard', 'Vivid'],
+      codexShort: 'Codex',
+      codexView: 'View',
+      codex: 'Hextech codex',
+      codexSub: 'Collect all 12 appearance cards',
+      equip: 'Equip',
+      owned: 'Owned',
+      locked: 'Locked',
+      collected: 'Collected',
+      redraw: 'Draw again',
+      clear: 'Clear collection',
+      clearConfirm: 'Click again to clear',
+      allCollected: 'Full codex',
+      goDraw: 'Draw',
+      flavors: {
+        gold: 'Gold burns at the edge of the board.',
+        cyan: 'Arcana flows between the hexes.',
+        violet: 'Violet static pins the back line.',
+        blue: 'Starlight lands on the last tile.'
+      },
       reset: 'Reset',
       close: 'Close',
       open: 'Golden Spatula theme settings',
@@ -400,9 +463,23 @@
       var canvasTimer = 0
       var canvasPath = ''
       var ambience = null
+      var draftEl = null
+      var codexEl = null
+      var draftCards = []
+      var overlay = ''
+      var overlayTrigger = null
+      var clearArmed = false
+      var clearTimer = 0
 
       function readState() {
-        var fallback = { on: true, accent: 'gold', texture: 'normal', ambience: true, corners: 'soft' }
+        var fallback = {
+          on: true,
+          accent: 'gold',
+          texture: 'normal',
+          ambience: true,
+          corners: 'soft',
+          collection: []
+        }
         try {
           var raw = window.localStorage.getItem(STORE_KEY)
           if (!raw) return fallback
@@ -413,6 +490,16 @@
           if (TEXTURES.indexOf(saved.texture) !== -1) fallback.texture = saved.texture
           if (typeof saved.ambience === 'boolean') fallback.ambience = saved.ambience
           if (CORNERS.indexOf(saved.corners) !== -1) fallback.corners = saved.corners
+          if (Array.isArray(saved.collection)) {
+            var seenCards = Object.create(null)
+            for (var ci = 0; ci < saved.collection.length; ci += 1) {
+              var cardId = saved.collection[ci]
+              if (CARD_IDS.indexOf(cardId) !== -1 && !seenCards[cardId]) {
+                seenCards[cardId] = true
+                fallback.collection.push(cardId)
+              }
+            }
+          }
         } catch (error) {
           /* private mode, disabled storage, corrupt JSON — defaults are fine */
         }
@@ -471,6 +558,8 @@
         panel.setAttribute('aria-label', c.title)
         panel.innerHTML = panelHtml(c)
         syncUi()
+        if (overlay === 'draft') renderDraft(true)
+        else if (overlay === 'codex') renderCodex()
       }
 
       /* -------------------------------------------------------------------
@@ -551,7 +640,8 @@
           accent: ACCENT_IDS.indexOf(patch.accent) === -1 ? state.accent : patch.accent,
           texture: TEXTURES.indexOf(patch.texture) === -1 ? state.texture : patch.texture,
           ambience: patch.ambience === undefined ? state.ambience : Boolean(patch.ambience),
-          corners: CORNERS.indexOf(patch.corners) === -1 ? state.corners : patch.corners
+          corners: CORNERS.indexOf(patch.corners) === -1 ? state.corners : patch.corners,
+          collection: state.collection
         }
         saveState()
         applyAttributes()
@@ -611,6 +701,18 @@
           swatch('gold', c) + swatch('cyan', c) + swatch('violet', c) + swatch('blue', c) +
           '</div>' +
           '</div>' +
+          '<div class="jcc-field jcc-draft-field">' +
+          '<button type="button" class="jcc-draft-btn" data-jcc="draft">' +
+          '<span class="jcc-draft-btn__mark" aria-hidden="true">' + SPATULA_SVG + '</span>' +
+          '<span class="jcc-draft-btn__text"><b>' + c.draft + '</b><small>' + c.draftSub + '</small></span>' +
+          '<span class="jcc-draft-btn__chev" aria-hidden="true">›</span>' +
+          '</button>' +
+          '<div class="jcc-progress">' +
+          '<span class="jcc-progress__label">' + c.codexShort + ' <b data-jcc-count>0</b>/12</span>' +
+          '<span class="jcc-progress__hexes" data-jcc-hexes aria-hidden="true"></span>' +
+          '<button type="button" class="jcc-link" data-jcc="codex">' + c.codexView + '</button>' +
+          '</div>' +
+          '</div>' +
           '<div class="jcc-field">' +
           '<span class="jcc-label">' + c.texture + '</span>' +
           '<div class="jcc-seg" role="group" aria-label="' + c.texture + '">' +
@@ -651,9 +753,13 @@
         var staleDock = document.getElementById(DOCK_ID)
         var stalePanel = document.getElementById(PANEL_ID)
         var staleAmbience = document.getElementById(AMBIENCE_ID)
+        var staleDraft = document.getElementById(DRAFT_ID)
+        var staleCodex = document.getElementById(CODEX_ID)
         if (staleDock) staleDock.remove()
         if (stalePanel) stalePanel.remove()
         if (staleAmbience) staleAmbience.remove()
+        if (staleDraft) staleDraft.remove()
+        if (staleCodex) staleCodex.remove()
 
         var c = currentCopy()
         dock = document.createElement('div')
@@ -679,9 +785,24 @@
         ambience.setAttribute('aria-hidden', 'true')
         ambience.innerHTML = '<span class="jcc-aurora"></span>'
 
+        draftEl = document.createElement('div')
+        draftEl.className = 'jcc-overlay'
+        draftEl.id = DRAFT_ID
+        draftEl.hidden = true
+
+        codexEl = document.createElement('div')
+        codexEl.className = 'jcc-overlay'
+        codexEl.id = CODEX_ID
+        codexEl.hidden = true
+
         document.body.appendChild(ambience)
         document.body.appendChild(dock)
         document.body.appendChild(panel)
+        document.body.appendChild(draftEl)
+        document.body.appendChild(codexEl)
+
+        draftEl.addEventListener('click', onOverlayClick)
+        codexEl.addEventListener('click', onOverlayClick)
 
         orb = dock.querySelector('.jcc-orb')
         orb.addEventListener('click', onOrbClick)
@@ -733,6 +854,20 @@
             corners[k].getAttribute('data-corners') === state.corners ? 'true' : 'false'
           )
         }
+
+        var count = state.collection.length
+        var countEl = panel.querySelector('[data-jcc-count]')
+        if (countEl) countEl.textContent = String(count)
+        var hexes = panel.querySelector('[data-jcc-hexes]')
+        if (hexes) {
+          var hexHtml = ''
+          for (var h = 0; h < CARD_IDS.length; h += 1) {
+            hexHtml += '<i' + (isOwned(CARD_IDS[h]) ? ' class="is-on"' : '') + '></i>'
+          }
+          if (hexes.innerHTML !== hexHtml) hexes.innerHTML = hexHtml
+        }
+        var progress = panel.querySelector('.jcc-progress')
+        if (progress) progress.classList.toggle('is-complete', count === CARD_IDS.length)
       }
 
       function openPanel() {
@@ -779,6 +914,10 @@
           setState({ on: true, accent: 'gold', texture: 'normal', ambience: true, corners: 'soft' })
         } else if (control.dataset.jcc === 'ambience') {
           setState({ ambience: !state.ambience })
+        } else if (control.dataset.jcc === 'draft') {
+          openDraft()
+        } else if (control.dataset.jcc === 'codex') {
+          openCodex()
         } else if (control.dataset.accent) {
           setState({ accent: control.dataset.accent })
         } else if (control.dataset.texture) {
@@ -789,6 +928,7 @@
       }
 
       function onDocumentClick(event) {
+        if (overlay) return
         if (!open) return
         if (panel && panel.contains(event.target)) return
         if (dock && dock.contains(event.target)) return
@@ -796,6 +936,15 @@
       }
 
       function onKeyDown(event) {
+        if (overlay) {
+          if (event.key === 'Escape') {
+            event.preventDefault()
+            closeOverlay(true)
+          } else if (event.key === 'Tab') {
+            trapOverlayFocus(event)
+          }
+          return
+        }
         if (event.key === 'Escape' && open) {
           event.preventDefault()
           closePanel(true)
@@ -806,6 +955,260 @@
         readyBound = false
         mountChrome()
         syncUi()
+      }
+
+      /* -------------------------------------------------------------------
+       * Augment draft and codex
+       * ----------------------------------------------------------------- */
+
+      function isOwned(id) {
+        return state.collection.indexOf(id) !== -1
+      }
+
+      function drawCards() {
+        /* Three different accents, each with its own random texture: the
+           draft reads as three choices, not three shades of one card. */
+        var accents = ACCENT_IDS.slice()
+        var picks = []
+        while (picks.length < 3 && accents.length > 0) {
+          var accentIndex = Math.floor(Math.random() * accents.length)
+          var accent = accents.splice(accentIndex, 1)[0]
+          var texture = TEXTURES[Math.floor(Math.random() * TEXTURES.length)]
+          picks.push(accent + '-' + texture)
+        }
+        return picks
+      }
+
+      function cardName(card, c) {
+        return c.names[card.accent] + ' · ' + c.cardTextures[TEXTURES.indexOf(card.texture)]
+      }
+
+      function cardHtml(id, c, index) {
+        var card = CARD_BY_ID[id]
+        if (!card) return ''
+        var accent = ACCENTS[card.accent]
+        var owned = isOwned(id)
+        var name = cardName(card, c)
+        return (
+          '<button type="button" class="jcc-card' + (owned ? ' is-owned' : '') + '"' +
+          ' data-jcc="pick" data-card="' + id + '"' +
+          ' aria-label="' + name + '"' +
+          ' style="--card-accent:' + accent.accent + ';--card-accent-2:' + accent.accent2 +
+          ';--card-accent-deep:' + accent.accentDeep + ';animation-delay:' + index * 70 + 'ms">' +
+          (owned ? '<span class="jcc-card__badge">' + c.owned + '</span>' : '') +
+          '<span class="jcc-card__art" aria-hidden="true">' + SPATULA_SVG + '</span>' +
+          '<span class="jcc-card__name">' + name + '</span>' +
+          '<span class="jcc-card__flavor">' + c.flavors[card.accent] + '</span>' +
+          '<span class="jcc-card__tex" aria-hidden="true"></span>' +
+          '<span class="jcc-card__cta">' + c.equip + '</span>' +
+          '</button>'
+        )
+      }
+
+      function draftHtml(c) {
+        var count = state.collection.length
+        return (
+          '<div class="jcc-scrim" data-jcc="dismiss"></div>' +
+          '<div class="jcc-tray" role="dialog" aria-modal="true" aria-labelledby="dsh-jcc-draft-title">' +
+          '<div class="jcc-tray__head">' +
+          '<div class="jcc-tray__title"><b id="dsh-jcc-draft-title">' + c.draft +
+          '</b><small>' + c.draftSub + '</small></div>' +
+          (count === CARD_IDS.length ? '<span class="jcc-chip">' + c.allCollected + '</span>' : '') +
+          '<button type="button" class="jcc-x" data-jcc="dismiss" aria-label="' + c.close +
+          '" title="' + c.close + '">' + X_SVG + '</button>' +
+          '</div>' +
+          '<div class="jcc-cards">' +
+          draftCards
+            .map(function (id, i) {
+              return cardHtml(id, c, i)
+            })
+            .join('') +
+          '</div>' +
+          '<div class="jcc-tray__foot">' +
+          '<button type="button" class="jcc-tray-btn" data-jcc="redraw">' + c.redraw + '</button>' +
+          '<button type="button" class="jcc-tray-link" data-jcc="codex">' + c.codex +
+          ' <b>' + count + '</b>/12</button>' +
+          '</div>' +
+          '</div>'
+        )
+      }
+
+      function renderDraft(keep) {
+        if (!draftEl || !codexEl) return
+        if (!keep || draftCards.length === 0) draftCards = drawCards()
+        draftEl.innerHTML = draftHtml(currentCopy())
+        draftEl.hidden = false
+        codexEl.hidden = true
+        overlay = 'draft'
+        var first = draftEl.querySelector('.jcc-card')
+        if (first) first.focus({ preventScroll: true })
+      }
+
+      function codexHtml(c) {
+        var count = state.collection.length
+        var cards = CARDS.map(function (card) {
+          var accent = ACCENTS[card.accent]
+          var owned = isOwned(card.id)
+          return (
+            '<button type="button" class="jcc-codex-card' + (owned ? '' : ' is-locked') + '"' +
+            ' data-jcc="codexPick" data-card="' + card.id + '"' +
+            (owned ? '' : ' disabled') +
+            ' style="--card-accent:' + accent.accent + ';--card-accent-2:' + accent.accent2 +
+            ';--card-accent-deep:' + accent.accentDeep + '">' +
+            '<span class="jcc-codex-card__hex" aria-hidden="true"></span>' +
+            '<span class="jcc-codex-card__name">' + cardName(card, c) + '</span>' +
+            '<span class="jcc-codex-card__state">' + (owned ? c.collected : c.locked) + '</span>' +
+            '</button>'
+          )
+        }).join('')
+        return (
+          '<div class="jcc-scrim" data-jcc="dismiss"></div>' +
+          '<div class="jcc-tray" role="dialog" aria-modal="true" aria-labelledby="dsh-jcc-codex-title">' +
+          '<div class="jcc-tray__head">' +
+          '<div class="jcc-tray__title"><b id="dsh-jcc-codex-title">' + c.codex +
+          '</b><small>' + c.codexSub + '</small></div>' +
+          '<span class="jcc-chip">' + count + ' / ' + CARD_IDS.length + '</span>' +
+          '<button type="button" class="jcc-x" data-jcc="dismiss" aria-label="' + c.close +
+          '" title="' + c.close + '">' + X_SVG + '</button>' +
+          '</div>' +
+          '<div class="jcc-codex-grid">' + cards + '</div>' +
+          '<div class="jcc-tray__foot">' +
+          '<button type="button" class="jcc-tray-btn" data-jcc="draw">' + c.goDraw + '</button>' +
+          '<button type="button" class="jcc-tray-link' + (clearArmed ? ' is-danger' : '') +
+          '" data-jcc="clear"' + (count === 0 ? ' disabled' : '') + '>' +
+          (clearArmed ? c.clearConfirm : c.clear) + '</button>' +
+          '</div>' +
+          '</div>'
+        )
+      }
+
+      function renderCodex() {
+        if (!codexEl) return
+        codexEl.innerHTML = codexHtml(currentCopy())
+        codexEl.hidden = false
+        draftEl.hidden = true
+        overlay = 'codex'
+        var first =
+          codexEl.querySelector('.jcc-codex-card:not([disabled])') || codexEl.querySelector('.jcc-x')
+        if (first) first.focus({ preventScroll: true })
+      }
+
+      function openDraft() {
+        if (!draftEl) return
+        overlayTrigger = panel ? panel.querySelector('[data-jcc="draft"]') : null
+        renderDraft(false)
+      }
+
+      function openCodex() {
+        if (!codexEl) return
+        overlayTrigger = panel ? panel.querySelector('[data-jcc="codex"]') : null
+        renderCodex()
+      }
+
+      function closeOverlay(refocus) {
+        overlay = ''
+        clearArmed = false
+        if (clearTimer) {
+          window.clearTimeout(clearTimer)
+          clearTimer = 0
+        }
+        if (draftEl) draftEl.hidden = true
+        if (codexEl) codexEl.hidden = true
+        if (refocus) {
+          var target =
+            overlayTrigger && overlayTrigger.isConnected
+              ? overlayTrigger
+              : panel
+                ? panel.querySelector('[data-jcc="draft"]')
+                : orb
+          if (target) target.focus({ preventScroll: true })
+        }
+        overlayTrigger = null
+      }
+
+      function pickCard(id) {
+        var card = CARD_BY_ID[id]
+        if (!card) return
+        if (!isOwned(id)) state.collection = state.collection.concat([id])
+        setState({ on: true, accent: card.accent, texture: card.texture })
+        closeOverlay(true)
+      }
+
+      function handleClear() {
+        if (state.collection.length === 0) return
+        if (!clearArmed) {
+          clearArmed = true
+          renderCodex()
+          var armedClear = codexEl.querySelector('[data-jcc="clear"]')
+          if (armedClear) armedClear.focus({ preventScroll: true })
+          clearTimer = window.setTimeout(function () {
+            clearTimer = 0
+            clearArmed = false
+            if (overlay === 'codex') renderCodex()
+          }, 3200)
+          return
+        }
+        if (clearTimer) {
+          window.clearTimeout(clearTimer)
+          clearTimer = 0
+        }
+        clearArmed = false
+        state.collection = []
+        saveState()
+        syncUi()
+        renderCodex()
+      }
+
+      function overlayFocusables(root) {
+        var nodes = root.querySelectorAll(
+          'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+        )
+        var list = []
+        for (var i = 0; i < nodes.length; i += 1) {
+          if (nodes[i].offsetParent !== null) list.push(nodes[i])
+        }
+        return list
+      }
+
+      function trapOverlayFocus(event) {
+        var root = overlay === 'draft' ? draftEl : codexEl
+        if (!root) return
+        var list = overlayFocusables(root)
+        if (list.length === 0) return
+        var first = list[0]
+        var last = list[list.length - 1]
+        var active = document.activeElement
+        if (event.shiftKey) {
+          if (active === first || !root.contains(active)) {
+            event.preventDefault()
+            last.focus()
+          }
+        } else if (active === last || !root.contains(active)) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+
+      function onOverlayClick(event) {
+        var root = event.currentTarget
+        var node = event.target
+        var control = null
+        while (node && node !== root) {
+          if (node.dataset && (node.dataset.jcc || node.dataset.card)) {
+            control = node
+            break
+          }
+          node = node.parentElement
+        }
+        if (!control) return
+        if (control.dataset.jcc === 'dismiss') closeOverlay(true)
+        else if (control.dataset.jcc === 'redraw') renderDraft(false)
+        else if (control.dataset.jcc === 'codex') openCodex()
+        else if (control.dataset.jcc === 'draw') openDraft()
+        else if (control.dataset.jcc === 'pick') pickCard(control.dataset.card)
+        else if (control.dataset.jcc === 'codexPick') {
+          if (!control.disabled) pickCard(control.dataset.card)
+        } else if (control.dataset.jcc === 'clear') handleClear()
       }
 
       /* -------------------------------------------------------------------
@@ -842,6 +1245,22 @@
         if (ambience) {
           ambience.remove()
           ambience = null
+        }
+        if (clearTimer) {
+          window.clearTimeout(clearTimer)
+          clearTimer = 0
+        }
+        overlay = ''
+        overlayTrigger = null
+        clearArmed = false
+        draftCards = []
+        if (draftEl) {
+          draftEl.remove()
+          draftEl = null
+        }
+        if (codexEl) {
+          codexEl.remove()
+          codexEl = null
         }
         if (dock) {
           dock.remove()

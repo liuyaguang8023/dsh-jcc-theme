@@ -11,7 +11,11 @@
     accent: params.get('accent') || 'gold',
     texture: params.get('texture') || 'normal',
     corners: params.get('corners') || 'soft',
-    ambience: params.get('ambience') !== '0'
+    ambience: params.get('ambience') !== '0',
+    collection: (params.get('owned') || '')
+      .split(',')
+      .map(function (s) { return s.trim() })
+      .filter(Boolean)
   }
 
   /* Chrome on file:// may expose a read-only storage object; a stand-in keeps
@@ -54,6 +58,14 @@
   if (params.get('panel') === '1') {
     var orb = document.querySelector('.jcc-orb')
     if (orb) orb.click()
+  }
+
+  if (params.get('draft') === '1') {
+    var draftBtn = document.querySelector('[data-jcc="draft"]')
+    if (draftBtn) draftBtn.click()
+  } else if (params.get('codex') === '1') {
+    var codexBtn = document.querySelector('[data-jcc="codex"]')
+    if (codexBtn) codexBtn.click()
   }
 
   window.__jccPreview = {

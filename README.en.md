@@ -40,6 +40,32 @@ Astral Blue with the vivid board and sharp corners:
 
 ![Dark · Astral Blue · Sharp](assets/screenshot-sharp.png)
 
+## Hextech augment draft
+
+The **Hextech augment** entry in the panel is not a monetized gacha: it is a
+three-choice draft. Draw three cards with three different accents, pick one, and its
+accent + texture is equipped immediately.
+
+![Hextech augment draft](assets/screenshot-draft.png)
+
+- **Cosmetic only** — 12 cards = 4 accents × 3 textures (`accent + texture`). No features,
+  model quota or permissions are ever drawn.
+- **Nothing is locked** — every combination stays manually selectable in the panel; the
+  draft is a discovery shortcut, not a gate.
+- **No currency, cooldown, daily reset or rarity roll** — redraws are unlimited, and
+  duplicates produce no resources.
+- **Local codex** — picks are stored in `collection` inside `dsh-jcc/v1`; owned cards can
+  be equipped from the codex, locked ones are silhouettes.
+- **Reset keeps the codex** — the appearance reset does not clear it; clearing is a
+  separate two-click action in the codex.
+- **No interruption** — the card overlay only opens from a deliberate click; Esc or the
+  scrim closes it and focus is trapped inside.
+- **Motion is optional** — cards deal in sequence, and `prefers-reduced-motion` shows them
+  immediately.
+
+The pool is only 12 cards; completing it shows "Full codex" and nothing else. This is
+appearance discovery, not a progression system.
+
 ## Install
 
 Requires **DSH 0.2.0-rc.1 or newer** (desktop included). The plugin is browser-only: no
@@ -63,15 +89,18 @@ Refresh the page when the market asks; if the host composes bundles at startup, 
 1. Click the hexagon in the bottom-right corner.
 2. In the panel:
    - **Theme on** — master switch; off restores the stock UI completely;
+   - **Hextech augment** — draw three, equip one;
    - **Augment** — gold / cyan / violet / blue accent;
    - **Board texture** — subtle / standard / vivid;
    - **Corners** — soft / sharp;
    - **Ambience** — aurora and gold dust on/off;
-   - **Reset** — back to Hextech Gold, standard board, soft corners, ambience on.
+   - **Codex** — the 12 cards, collected and equipable;
+   - **Reset** — back to Hextech Gold, standard board, soft corners, ambience on (the
+     codex is kept).
 3. Click outside or press `Esc` to close.
 
 The choice lives in `localStorage` under `dsh-jcc/v1`
-(`{"on":true,"accent":"gold","texture":"normal","ambience":true,"corners":"soft"}`). Nothing is uploaded.
+(`{"on":true,"accent":"gold","texture":"normal","ambience":true,"corners":"soft","collection":[]}`). Nothing is uploaded.
 
 ## How it works
 
@@ -89,6 +118,10 @@ The choice lives in `localStorage` under `dsh-jcc/v1`
   behind the interface and never covers text.
 - **Corners** — sharp mode overrides both the panel's own radii and the product's
   `--dsw-radius-*` tokens, so cards, buttons and the panel change together.
+- **Draft** — the 12 cards are exactly the 4 × 3 `accent + texture` pairs. A draw picks
+  three different accents and one random texture each, so the three cards are always three
+  colours. A pick calls `setState` once; the codex lives in the same `localStorage` key
+  and adds no requests.
 - **Panel** — plain DOM and CSS. No React, no `slots`, no host API, so a component rename
   in a future host cannot break it; only the stable `data-ds-dark-theme` attribute and
   the design tokens are coupled.

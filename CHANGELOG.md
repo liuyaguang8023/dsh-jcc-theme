@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0 — 2026-10-27
+
+- **Hextech augment draft**: three cards, three different accents, pick one. The pick
+  applies its accent + texture immediately.
+- **12-card local codex**: every accent × texture pair, stored in the same `dsh-jcc/v1`
+  key. Owned cards are usable from the codex; locked cards are silhouettes.
+- No currency, cooldown, daily reset, rarity roll or duplicate shards. Redraws are
+  unlimited and every combination remains manually selectable in the panel, so the draft
+  is a discovery shortcut rather than a gate.
+- Two-click "clear collection" instead of a dialog; the appearance reset leaves the
+  codex untouched.
+- Card deal animation with reduced-motion fallback; overlay focus trap and Esc-to-close.
+
+
 ## 0.1.2 — 2026-10-18
 
 - Fourth augment: **Astral Blue** (星界蓝), with its own light/dark token pair.
